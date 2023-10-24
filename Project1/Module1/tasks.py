@@ -15,21 +15,12 @@ from Module1.models.downloaded_file import DownloadedFile
 def download_items(url: str, ydl_opts: dict, playlist: bool, output_dir: str, dl_req_id: int) -> None:
     yt_error_log = logging.getLogger("ytd.errors")
     dl_req = DownloadRequest.objects.get(pk=dl_req_id)
-    try:
-        ydl_opts["quiet"] = True
-        ydl_opts["noprogress"] = True
-        ydl_opts["nowarnings"] = True
-        ydl_opts["noplaylist"] = not playlist
-        ydl_opts["outtmpl"] = os.path.join(output_dir, ydl_opts["outtmpl"])
-        for idx, pp in enumerate(ydl_opts.get("postprocessors", [])):
-            if pp.get("key") == "MetadataParser" and pp.get("when") == "pre_process":
-                ydl_opts["postprocessors"][idx]["actions"].append((yt_dlp.postprocessor.MetadataParserPP.Actions.INTERPRET, 'artist', r'(?P<creator>[^,]+)'))
-    except Exception as e:
-        yt_error_log.error(e)
-        dl_req.state = "CRITICAL ERROR"
-        dl_req.finish_datetime = datetime.datetime.now()
-        dl_req.save()
-        return None
+    ydl_opts["quiet"], ydl_opts["noprogress"], ydl_opts["nowarnings"] = True
+    ydl_opts["noplaylist"] = not playlist
+    ydl_opts["outtmpl"] = os.path.join(output_dir, ydl_opts["outtmpl"])
+    for idx, pp in enumerate(ydl_opts.get("postprocessors", [])):
+        if pp.get("key") == "MetadataParser" and pp.get("when") == "pre_process":
+            ydl_opts["postprocessors"][idx]["actions"].append((yt_dlp.postprocessor.MetadataParserPP.Actions.INTERPRET, 'artist', r'(?P<creator>[^,]+)'))
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.cache.remove()
         filename_collector = FilenameCollectorPP()

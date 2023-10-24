@@ -19,15 +19,9 @@ class DownloadedFileAdmin (admin.ModelAdmin):
     search_fields = ['filename']
 
 class DownloadRequestAdmin (admin.ModelAdmin):
-    list_display = ['id', 'url', 'start_datetime', 'finish_datetime', 'user', 'state','display_files','format']
-    list_filter = ('state','user','start_datetime', 'finish_datetime')
+    list_display = ['id', 'url', 'task_status', 'task_date_created', 'task_date_done', 'user', 'files_downloaded','format']
+    list_filter = ('user','task__status', 'task__date_created', 'task__date_done')
 
-    def display_files(self, obj):
-        files = DownloadedFile.objects.filter(request_id=obj)
-        files_str = ";".join([soubor.filename for soubor in files])
-        return files_str
-    
-    display_files.short_description = 'Soubory'
     
 # Rozšíření třídy UserAdmin
 class CustomUserAdmin(UserAdmin):

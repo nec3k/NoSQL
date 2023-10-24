@@ -1,31 +1,43 @@
 from django.db import models
 from django.contrib.auth.models import User
 from Module1.models.download_format import DownloadFormat
+from django_celery_results.models import TaskResult
 
 class DownloadRequest(models.Model):
-    REQUEST_STATES = [
-        ('SUCCESS','ÚSPĚCH'),
-        ('PROCESSING','ZPRACOVÁVÁNÍ'),
-        ('IN_QUEUE','VE FRONTĚ'),
-        ('DOWNLOADER ERROR','CHYBA STAHOVÁNÍ'),
-        ('CRITICAL ERROR','KRITICKÁ CHYBA'),
-    ]
     id = models.AutoField(primary_key=True)
     url = models.CharField(max_length=512, null=False, verbose_name="URL")
-    start_datetime = models.DateTimeField(null=False, verbose_name="Datum START", auto_now_add=True)
-    finish_datetime = models.DateTimeField(null=True, verbose_name="Datum FINISH", auto_now_add=False)
+    task = models.ForeignKey(TaskResult, null=True, on_delete=models.SET_NULL)
     user = models.ForeignKey(User, null=False, on_delete=models.CASCADE, verbose_name="Uživatel")
-    state = models.CharField(null=False, verbose_name="Stav požadavku", choices=REQUEST_STATES, default="IN_QUEUE")
     format = models.ForeignKey(DownloadFormat, null=False, verbose_name="Formát", on_delete=models.RESTRICT)
 
+    @property
+    def task_status(self):
+        return self.task.status if self.task is not None else None
+    
+    @property
+    def task_date_created(self):
+        return self.task.date_created if self.task is not None else None
+    
+    @property
+    def task_date_done(self):
+        return self.task.date_done if self.task is not None else None
+    
+    @property
+    def files_downloaded(self):
+        from Module1.models.downloaded_file import DownloadedFile
+        files = DownloadedFile.objects.filter(request=self)
+        files_str = ";".join([soubor.filename for soubor in files])
+        return files_str
+
     def state_css_class(self):
-        if self.state == 'SUCCESS':
+        return ""
+        if self.task_status == 'SUCCESS':
             return 'success'
-        elif self.state == 'PROCESSING':
+        elif self.task_status == 'PROCESSING':
             return 'warning'
-        elif self.state == 'IN_QUEUE':
+        elif self.task_status == 'IN_QUEUE':
             return 'info'
-        elif self.state == 'DOWNLOADER ERROR' or 'CRITICAL ERROR':
+        elif self.task_status == 'DOWNLOADER ERROR' or 'CRITICAL ERROR':
             return 'danger'
         else:
             return 'secondary'
