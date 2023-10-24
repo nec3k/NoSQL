@@ -27,7 +27,8 @@ SECRET_KEY = '1t!w)rrbz@xqw2en0%josc8mw#&xh$e-!n(4rl3(-vl5q7s$(='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '10.0.0.170', '193.122.53.226','ytd.ipmon.cz']
+ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['127.0.0.1', '10.0.0.170', 'ytd.ipmon.cz']
 
 
 # Application definition
@@ -82,23 +83,24 @@ CELERY_RESULT_EXTENDED = True
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        'NAME': 'django0',
-        'USER': 'django',
+        'NAME': 'postgres',
+        'USER': 'postgres',
         'PASSWORD': 'qqqqqq',
-        'HOST': 'localhost',
+        'HOST': 'postgres',
         'PORT': '5432',
     },
 }
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
+        "LOCATION": "redis://redis:6379",
     }
 }
-
 
 
 
@@ -179,7 +181,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
@@ -187,13 +189,13 @@ LOGGING = {
         'request_file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/requests.log'),
+            'filename': os.path.join(BASE_DIR, 'logs','requests.log'),
             'formatter': 'verbose',
         },
         'ytd_errors_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/ytd_errors.log'),
+            'filename': os.path.join(BASE_DIR, 'logs','ytd_errors.log'),
             'formatter': 'verbose',
         },
     },

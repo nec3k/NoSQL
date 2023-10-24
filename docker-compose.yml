@@ -1,0 +1,27 @@
+version: '3'
+services:
+  django:
+    build: .
+    container_name: django
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    volumes:
+      - ./Project1:/Project1
+    depends_on:
+      - redis
+      - postgres
+
+  redis:
+    image: redislabs/redismod
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: 'postgres:latest'
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: qqqqqq
+    ports:
+      - "5432:5432"
