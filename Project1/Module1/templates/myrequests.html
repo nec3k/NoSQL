@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% load static %}
+{% load add_css %}
+
+{% block content %}
+<!--a class="m-2 btn btn-dark" href="#" role="button">Obnovit stránku</a-->
+<hr class="mt-2 mb-3"/>
+<div class="table-responsive">
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Stav</th>
+      <th scope="col">Formát</th>
+      <th scope="col">Odesláno</th>
+      <th scope="col">Zpracováno</th>
+      <th scope="col">Stažené soubory</th>
+      <th scope="col">URL</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for i in dl_requests %}
+    <tr class="table-{{ i.state_css_class }}" style="white-space:nowrap">
+      <td>{{ i.get_state_display }}</td>
+      <td>{{ i.format }}</td>
+      <td>{{ i.start_datetime }}</td>
+      <td>{{ i.finish_datetime }}</td>
+      <td>{{ i.downloadedfile_set.all|join:", " }}</td>
+      <td>{{ i.url }}</td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+</div>
+{% if dl_requests.paginator.num_pages > 1 %}
+<div class="pagination d-flex justify-content-center my-2">
+  <span class="step-links">
+      {% if dl_requests.has_previous %}
+        <a href="?page=1" class="btn btn-dark">&laquo; první</a>
+        <a href="?page={{ dl_requests.previous_page_number }}" class="btn btn-dark">předchozí</a>
+      {% else %}
+        <a href="#" class="btn invisible">&laquo; první</a>
+        <a href="#" class="btn invisible">předchozí</a>
+      {% endif %}
+      
+      <span class="current-page mx-2">Stránka {{ dl_requests.number }} z {{ dl_requests.paginator.num_pages }}</span>
+      
+      {% if dl_requests.has_next %}
+          <a href="?page={{ dl_requests.next_page_number }}" class="btn btn-dark">další</a>
+          <a href="?page={{ dl_requests.paginator.num_pages }}" class="btn btn-dark">poslední &raquo;</a>
+      {% else %}
+          <a href="#" class="btn invisible">další</a>
+          <a href="#" class="btn invisible">poslední &raquo;</a>
+      {% endif %}
+  </span>
+</div>
+{% endif %}
+{% endblock %}

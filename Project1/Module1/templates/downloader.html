@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% load static %}
+{% load add_css %}
+
+{% block content %}
+    <form action="{% url 'downloader' %}" method="POST">
+        {% csrf_token %}
+
+        {% for field in form %}
+            {% if field.field.widget.input_type == 'checkbox' %}
+            <div class="form-check my-3 mx-2">
+                {{ field|add_css:"form-check-input" }}
+                <span class="h5 mx-2">{{ field.label_tag}}</span>
+            </div>
+            {% else %}
+            <div class="form-group">
+                <span class="h5">{{ field.label_tag}}</span>
+                {{ field|add_css:"form-control" }}
+            </div>
+            {% endif %}
+        {% endfor %}
+        <div class="buttonBox">
+            <input type="submit" value="Odeslat" class="btn btn-success my-2">
+        </div>
+    </form>
+{% endblock %}

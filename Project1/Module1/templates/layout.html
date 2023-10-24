@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+<nav class="navbar navbar-expand navbar-dark bg-dark">
+	  {% if user.is_authenticated %}
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'downloader' %}">Downloader</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'file_manager' %}">Soubory</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'my_requests' %}">Moje požadavky</a>
+          </li>
+	</ul>  
+	  <ul class="ms-auto navbar-nav">
+	    {% if user.is_superuser %}                   
+	    <li class="nav-item me-5">
+			    <a class="nav-link active text-warning" href="{% url 'admin:index' %}">Administrace</a>
+		    </li>   
+	    {% endif %}
+	    <span class="navbar-text me-5">Jste příhlášen jako: {{ user.username }}</span>
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url 'password_change' %}">Změna hesla</a>
+      </li>
+	    <li class="nav-item">
+              <a class="nav-link active" href="{% url 'logout' %}">Odhásit se</a>
+	    </li>  
+          </ul>
+	  {% endif %}
+</nav>
+
+<div class="container">
+  <h1 class="text-center my-3">{{ title }}</h1>
+  <div class="border border-dark border-2 rounded-3">
+    {% for message in messages %}
+    <div class="m-2 alert alert-{{message.level_tag}} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% block content %}
+    {% endblock %}
+  </div>
+</div>
+
+</body>
+</html>

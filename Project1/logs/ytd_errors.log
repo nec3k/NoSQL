@@ -1,0 +1,10 @@
+ERROR 19. 10. 15:19 Cannot assign "24": "DownloadedFile.request_id" must be a "DownloadRequest" instance.
+ERROR 21. 10. 15:40 ERROR: [youtube] 2sd3kGasdsd: Video unavailable
+ERROR 22. 10. 21:16 ERROR: [generic] 'qwerty' is not a valid URL. Set --default-search "ytsearch" (or run  yt-dlp "ytsearch:qwerty" ) to search YouTube
+ERROR 22. 10. 21:16 'NoneType' object is not iterable
+ERROR 22. 10. 21:17 'NoneType' object is not iterable
+ERROR 22. 10. 21:18 ERROR: [generic] 'testtt' is not a valid URL. Set --default-search "ytsearch" (or run  yt-dlp "ytsearch:testtt" ) to search YouTube
+ERROR 22. 10. 21:22 ERROR: [generic] 'aa' is not a valid URL. Set --default-search "ytsearch" (or run  yt-dlp "ytsearch:aa" ) to search YouTube
+ERROR 22. 10. 21:23 ERROR: [generic] 'qq' is not a valid URL. Set --default-search "ytsearch" (or run  yt-dlp "ytsearch:qq" ) to search YouTube
+ERROR 22. 10. 21:23 ERROR: [generic] 'qq' is not a valid URL. Set --default-search "ytsearch" (or run  yt-dlp "ytsearch:qq" ) to search YouTube
+ERROR 23. 10. 14:44 Field 'id' expected a number but got <DownloadRequest: Požadavek id: 57, založil: david (2023-10-23 12:43)>.

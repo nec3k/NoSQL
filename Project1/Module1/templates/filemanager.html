@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% load static %}
+{% load add_css %}
+
+{% block content %}
+
+<div>
+<form action="{% url 'file_manager' %}" method="POST">
+    {% csrf_token %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">
+                    <input id="select-all-items" class="d-none" type="checkbox" onclick="for(c in document.getElementsByName('files')) document.getElementsByName('files').item(c).checked = this.checked">
+                    <label for="select-all-items">❌</label></th>
+                <th scope="col">Název souboru</th>
+            </tr>
+        </thead>
+        <tbody id="id_files" >
+            {% for name, _ in form.files.field.widget.choices %}
+            <tr>
+                <td><input id="id_files_{{ forloop.counter0 }}" type="checkbox" name="files" value="{{ name }}" class="form-check-input align-center shadow-none border border-danger rounded checkbox-danger"></td>
+                <td><label for="{{ name }}"><a href="{% get_media_prefix %}{{ name }}" download class="h5">{{ name }}</a><br></label></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="buttonBox">
+        <input type="submit" value="Odstranit vybrané soubory" class="btn btn-danger my-2">
+    </div>
+</form>
+
+</div>
+{% endblock %}
