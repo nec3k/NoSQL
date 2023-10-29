@@ -15,7 +15,9 @@ from Module1.models.downloaded_file import DownloadedFile
 def download_items(url: str, ydl_opts: dict, playlist: bool, output_dir: str, dl_req_id: int) -> None:
     yt_error_log = logging.getLogger("ytd.errors")
     dl_req = DownloadRequest.objects.get(pk=dl_req_id)
-    ydl_opts["quiet"], ydl_opts["noprogress"], ydl_opts["nowarnings"] = True
+    ydl_opts["quiet"] = True
+    ydl_opts["noprogress"] = True
+    ydl_opts["nowarnings"] = True
     ydl_opts["noplaylist"] = not playlist
     ydl_opts["outtmpl"] = os.path.join(output_dir, ydl_opts["outtmpl"])
     for idx, pp in enumerate(ydl_opts.get("postprocessors", [])):

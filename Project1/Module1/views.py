@@ -6,7 +6,7 @@ from Module1.forms.downloaderForm import DownloaderForm
 from Module1.models.download_request import DownloadRequest
 from Module1.forms.loginForm import LoginForm
 from Module1.tasks import download_items
-from Project1.settings import MEDIA_ROOT
+from Project1.settings import MEDIA_ROOT, MEDIA_URL
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
@@ -19,6 +19,7 @@ from django.shortcuts import redirect
 from django.template import loader
 from django.views.static import serve
 from django.contrib.auth.forms import PasswordChangeForm
+from django_celery_results.models import TaskResult
 
 #def is_superuser(user):
 #    return user.is_superuser
@@ -39,7 +40,7 @@ def downloader(request):
             stripped_urls = map(lambda x: x.strip(), form_data.get("content", "").split("\n"))
             playlist = form_data.get("playlist", False)
             selected_format = form_data.get("format")
-            output_dir = os.path.join(MEDIA_ROOT, request.user.username)
+            output_dir = os.path.join(MEDIA_URL, request.user.username)
             unique_urls = dict.fromkeys(stripped_urls).keys()
             added_to_queue_count = 0
             for url in unique_urls:
@@ -50,20 +51,23 @@ def downloader(request):
                 else:
                     added_to_queue_count += 1
                     new_dl_req = DownloadRequest.objects.create(url=url, format=selected_format, user=request.user)
-                    download_items.delay(url=url, ydl_opts=selected_format.yt_dl_opts, playlist=playlist, output_dir=output_dir, dl_req_id=new_dl_req.id)
+                    task = download_items.delay(url=url, ydl_opts=selected_format.yt_dl_opts, playlist=playlist, output_dir=output_dir, dl_req_id=new_dl_req.id)
+                    new_dl_req.task = TaskResult.objects.get(task_id = task.id)
+                    new_dl_req.save()
             messages.info(request, f"{added_to_queue_count} stahování zařazeno do fronty, více informací naleznete v Historii stahování. ")
             return redirect("my_requests")
         else:
             for error in form.errors.as_data().values():
                 messages.error(request, error)
             return redirect("downloader")
-    template = loader.get_template('downloader.html')
-    form = DownloaderForm()
-    content = {
-        "title": "Youtube downloader",
-        "form": form,
-    }
-    return HttpResponse(template.render(content, request))
+    else:
+        template = loader.get_template('downloader.html')
+        form = DownloaderForm()
+        content = {
+            "title": "Youtube downloader",
+            "form": form,
+        }
+        return HttpResponse(template.render(content, request))
 
 @login_required(login_url='login_page')
 def file_manager(request):
@@ -100,7 +104,7 @@ def file_manager(request):
 def my_requests(request):
     template = loader.get_template('myrequests.html')
     page_number = request.GET.get('page', 1) 
-    dl_requests = DownloadRequest.objects.filter(user=request.user).order_by("-finish_datetime", "-start_datetime")
+    dl_requests = DownloadRequest.objects.filter(user=request.user).order_by("-task__date_done", "-task__date_created")
     dl_requests_with_files = dl_requests.prefetch_related("downloadedfile_set")
     paginator_dl_req_w_files = Paginator(dl_requests_with_files, 5)
     page_dl_req_w_files = paginator_dl_req_w_files.get_page(page_number)

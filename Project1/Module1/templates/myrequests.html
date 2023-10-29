@@ -22,8 +22,8 @@
     <tr class="table-{{ i.state_css_class }}" style="white-space:nowrap">
       <td>{{ i.get_state_display }}</td>
       <td>{{ i.format }}</td>
-      <td>{{ i.start_datetime }}</td>
-      <td>{{ i.finish_datetime }}</td>
+      <td>{{ i.task__date_done }}</td>
+      <td>{{ i.task__date_created }}</td>
       <td>{{ i.downloadedfile_set.all|join:", " }}</td>
       <td>{{ i.url }}</td>
     </tr>

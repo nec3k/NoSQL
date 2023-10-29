@@ -43,4 +43,4 @@ class DownloadRequest(models.Model):
             return 'secondary'
 
     def __str__(self) -> str:
-        return f"Požadavek id: {self.id}, založil: {self.user} ({self.start_datetime.strftime('%Y-%m-%d %H:%M')})"
+        return f"Požadavek id: {self.id}, založil: {self.user}"

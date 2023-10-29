@@ -75,7 +75,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Project1.wsgi.application'
 
 CELERY_TASK_TIME_LIMIT = 45 * 60
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_TRACK_STARTED = True
 CELERY_RESULT_EXTENDED = True
@@ -147,7 +147,7 @@ STATIC_URL = 'static/'
 #STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"), )
 
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
