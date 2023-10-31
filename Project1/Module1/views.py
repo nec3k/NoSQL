@@ -29,9 +29,6 @@ from django_celery_results.models import TaskResult
 
 
 @login_required(login_url='login_page')
-@cache_page(60 * 5)
-@vary_on_cookie
-@csrf_protect
 def downloader(request):
     if request.method == "POST":
         form = DownloaderForm(request.POST)
