@@ -17,10 +17,10 @@
             </tr>
         </thead>
         <tbody id="id_files" >
-            {% for name, _ in form.files.field.widget.choices %}
+            {% for name, description in form.files.field.widget.choices %}
             <tr>
                 <td><input id="id_files_{{ forloop.counter0 }}" type="checkbox" name="files" value="{{ name }}" class="form-check-input align-center shadow-none border border-danger rounded checkbox-danger"></td>
-                <td><label for="{{ name }}"><a href="{% get_media_prefix %}{{ name }}" download class="h5">{{ name }}</a><br></label></td>
+                <td><label for="{{ name }}"><a href="{% get_media_prefix %}{{ name }}" download class="h5">{{ description }}</a><br></label></td>
             </tr>
             {% endfor %}
         </tbody>

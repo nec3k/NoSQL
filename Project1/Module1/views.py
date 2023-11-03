@@ -6,7 +6,7 @@ from Module1.forms.downloaderForm import DownloaderForm
 from Module1.models.download_request import DownloadRequest
 from Module1.forms.loginForm import LoginForm
 from Module1.tasks import download_items
-from Project1.settings import MEDIA_ROOT, MEDIA_URL
+from Project1.settings import MEDIA_ROOT, MEDIA_URL, MAX_URL_LENGTH
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
@@ -43,7 +43,7 @@ def downloader(request):
             for url in unique_urls:
                 if len(url) == 0:
                     continue
-                elif len(url) > 512: 
+                elif len(url) > MAX_URL_LENGTH: 
                     messages.error(f"{url} bude přeskočena, protože je příliš dlouhá ...")
                 else:
                     added_to_queue_count += 1
@@ -68,13 +68,13 @@ def downloader(request):
 
 @login_required(login_url='login_page')
 def file_manager(request):
-    template = loader.get_template('filemanager.html')
     if request.user.is_superuser and request.GET.get('username') is not None:
         username = request.GET.get('username')
         messages.info(request, f"Prohlížíte si stažené soubory uživatele {username}.")
     else:
         username = request.user.username
     folder = os.path.join(MEDIA_ROOT, username)
+    
     if request.method == "POST":
         form = FileForm(get_files_in_folder(folder), request.POST)
         if form.is_valid():
@@ -87,8 +87,9 @@ def file_manager(request):
         else:
             for error in form.errors.as_data().values():
                 messages.error(request, error)
-    form = FileForm(file_list=get_files_in_folder(folder))
 
+    template = loader.get_template('filemanager.html')
+    form = FileForm(file_list=get_files_in_folder(folder))
     content = {
         "title": "Soubory",
         "files": get_files_in_folder(folder),

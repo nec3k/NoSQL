@@ -13,8 +13,6 @@ from Module1.models.downloaded_file import DownloadedFile
 
 @shared_task
 def download_items(url: str, ydl_opts: dict, playlist: bool, output_dir: str, dl_req_id: int) -> None:
-    yt_error_log = logging.getLogger("ytd.errors")
-    dl_req = DownloadRequest.objects.get(pk=dl_req_id)
     ydl_opts["quiet"] = True
     ydl_opts["noprogress"] = True
     ydl_opts["nowarnings"] = True
@@ -27,19 +25,7 @@ def download_items(url: str, ydl_opts: dict, playlist: bool, output_dir: str, dl
         ydl.cache.remove()
         filename_collector = FilenameCollectorPP()
         ydl.add_post_processor(filename_collector)
-        dl_req.state = "PROCESSING"
-        dl_req.save()
-        try:
-            ydl.download([url])
-            dl_req.state = "SUCCESS"
-            DownloadedFile.objects.bulk_create([DownloadedFile(filename=filename, request=dl_req) for filename in filename_collector.filenames])
-        except yt_dlp.DownloadError as e:
-            yt_error_log.error(e)
-            dl_req.state = "DOWNLOADER ERROR"
-        except Exception as e:
-            yt_error_log.error(e)
-            dl_req.state = "CRITICAL ERROR"
-        finally:
-            dl_req.finish_datetime = datetime.datetime.now()
-            dl_req.save()
+        ydl.download([url])
+        DownloadedFile.objects.bulk_create([DownloadedFile(filename=filename, request=DownloadRequest.objects.get(pk=dl_req_id)) for filename in filename_collector.filenames])
+
 

@@ -2,11 +2,17 @@ import os
 
 
 def get_files_in_folder(folder_path) -> list:
-    try:
-        files_in_folder = sorted(list(filter(lambda file: os.path.isfile(os.path.join(folder_path, file)), os.listdir(folder_path))))
-        return list(zip(files_in_folder, files_in_folder))
-    except FileNotFoundError:
+    if not os.path.isdir(folder_path):
         return []
+    files_in_folder = filter(lambda file: os.path.isfile(os.path.join(folder_path, file)), os.scandir(folder_path)) 
+    filenames = map(lambda file: file.name, files_in_folder)
+    files_info = map(lambda file: {"filename": file.name, "size": file.stat().st_size, "ctime": file.stat().st_ctime}, files_in_folder)
+    return zip(filenames, files_info)
+    
+
+        #for item in os.scandir(folder_path):
+         #   print(item.name, item.path, item.stat().st_size, item.stat().st_ctime)
+        #return list(zip(files_in_folder, files_in_folder))
 
 
 def delete_files(root_directory, files_names: list) -> None:
