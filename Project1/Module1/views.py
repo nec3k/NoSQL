@@ -74,24 +74,25 @@ def file_manager(request):
     else:
         username = request.user.username
     folder = os.path.join(MEDIA_ROOT, username)
-    files = get_files_in_folder(folder)
-    print(files[0][1]["ctime"], type(files[0][1]["ctime"]))
+
     if request.method == "POST":
+        files = get_files_in_folder(folder)
         form = FileForm(files, request.POST)
         if form.is_valid():
-            files = form.cleaned_data["files"]
-            if files:
-                delete_files(folder, files)
-                messages.info(request, f"Úspěšně jsem odstranil {len(files)} souborů. ")
+            form_files = form.cleaned_data["files"]
+            if form_files:
+                delete_files(folder, form_files)
+                messages.info(request, f"Úspěšně jsem odstranil {len(form_files)} souborů. ")
             else: 
                 messages.warning(request, "Nebyl vybrán žádný soubor k odtranění! ")
-    else: 
-        form = FileForm(file_list=files)
-
+        else:
+            for _, errors in form.errors.items():
+                messages.error(request,errors)
+    files = get_files_in_folder(folder)
+    form = FileForm(file_list=files)
     template = loader.get_template('filemanager.html')
     content = {
         "title": "Soubory",
-        "files": files,
         "form": form,
         "action_url": "file_manager",
         "submit_button_text" : "Odstranit vybrané soubory",
@@ -151,7 +152,6 @@ def logout_page(request):
 @login_required(login_url='login_page')
 def protected_serve(request, path):
     document_root = MEDIA_ROOT+'/'+request.user.username
-    print(path)
     return serve(request, path, document_root)
 
 @login_required(login_url='login_page')

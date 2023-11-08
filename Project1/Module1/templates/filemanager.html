@@ -5,16 +5,7 @@
 {% load timestamp_to_datetime %}
 
 {% block content %}
-{% if form.errors %}
-      {% for field in form %}
-        {% for error in field.errors %}
-        <div class="m-2 alert alert-danger alert-dismissible fade show" role="alert">
-            {{ error }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endfor %}
-{% endif %}
+
 <div>
 <form action="{% url 'file_manager' %}" method="POST">
     {% csrf_token %}
