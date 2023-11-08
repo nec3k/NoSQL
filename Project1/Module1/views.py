@@ -51,7 +51,7 @@ def downloader(request):
                     task = download_items.delay(url=url, ydl_opts=selected_format.yt_dl_opts, playlist=playlist, output_dir=output_dir, dl_req_id=new_dl_req.id)
                     new_dl_req.task = TaskResult.objects.get(task_id = task.id)
                     new_dl_req.save()
-            messages.info(request, f"{added_to_queue_count} stahování zařazeno do fronty, více informací naleznete v Historii stahování. ")
+            messages.info(request, f"{added_to_queue_count} stahování zařazeno do fronty. ")
             return redirect("my_requests")
         else:
             for error in form.errors.as_data().values():
@@ -74,9 +74,10 @@ def file_manager(request):
     else:
         username = request.user.username
     folder = os.path.join(MEDIA_ROOT, username)
-    
+    files = get_files_in_folder(folder)
+    print(files[0][1]["ctime"], type(files[0][1]["ctime"]))
     if request.method == "POST":
-        form = FileForm(get_files_in_folder(folder), request.POST)
+        form = FileForm(files, request.POST)
         if form.is_valid():
             files = form.cleaned_data["files"]
             if files:
@@ -84,27 +85,28 @@ def file_manager(request):
                 messages.info(request, f"Úspěšně jsem odstranil {len(files)} souborů. ")
             else: 
                 messages.warning(request, "Nebyl vybrán žádný soubor k odtranění! ")
-        else:
-            for error in form.errors.as_data().values():
-                messages.error(request, error)
+    else: 
+        form = FileForm(file_list=files)
 
     template = loader.get_template('filemanager.html')
-    form = FileForm(file_list=get_files_in_folder(folder))
     content = {
         "title": "Soubory",
-        "files": get_files_in_folder(folder),
-        "form": form
+        "files": files,
+        "form": form,
+        "action_url": "file_manager",
+        "submit_button_text" : "Odstranit vybrané soubory",
     }
     return HttpResponse(template.render(content, request))
 
 
 @login_required(login_url='login_page')
 def my_requests(request):
+    page_size = 5
     template = loader.get_template('myrequests.html')
     page_number = request.GET.get('page', 1) 
-    dl_requests = DownloadRequest.objects.filter(user=request.user).order_by("-task__date_done", "-task__date_created")
+    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "-task__date_created")
     dl_requests_with_files = dl_requests.prefetch_related("downloadedfile_set")
-    paginator_dl_req_w_files = Paginator(dl_requests_with_files, 5)
+    paginator_dl_req_w_files = Paginator(dl_requests_with_files, page_size)
     page_dl_req_w_files = paginator_dl_req_w_files.get_page(page_number)
     content = {
         "title": "Moje požadavky",

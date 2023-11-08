@@ -1,9 +1,20 @@
 {% extends "layout.html" %}
 {% load static %}
 {% load add_css %}
+{% load divide %}
+{% load timestamp_to_datetime %}
 
 {% block content %}
-
+{% if form.errors %}
+      {% for field in form %}
+        {% for error in field.errors %}
+        <div class="m-2 alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endfor %}
+{% endif %}
 <div>
 <form action="{% url 'file_manager' %}" method="POST">
     {% csrf_token %}
@@ -14,13 +25,17 @@
                     <input id="select-all-items" class="d-none" type="checkbox" onclick="for(c in document.getElementsByName('files')) document.getElementsByName('files').item(c).checked = this.checked">
                     <label for="select-all-items">❌</label></th>
                 <th scope="col">Název souboru</th>
+                <th scope="col">Velikost</th>
+                <th scope="col">Datum</th>
             </tr>
         </thead>
         <tbody id="id_files" >
             {% for name, description in form.files.field.widget.choices %}
             <tr>
                 <td><input id="id_files_{{ forloop.counter0 }}" type="checkbox" name="files" value="{{ name }}" class="form-check-input align-center shadow-none border border-danger rounded checkbox-danger"></td>
-                <td><label for="{{ name }}"><a href="{% get_media_prefix %}{{ name }}" download class="h5">{{ description }}</a><br></label></td>
+                <td><label for="id_files_{{ forloop.counter0 }}"><a href="{% get_media_prefix %}{{ name }}" download class="h5">{{ description.filename }}</a><br></label></td>
+                <td><p class="h5">{{ description.size | divide:1_048_576 | floatformat:1 }} MB</td>
+                <td><p class="h5">{{ description.ctime|timestamp_to_datetime }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -30,6 +45,5 @@
         <input type="submit" value="Odstranit vybrané soubory" class="btn btn-danger my-2">
     </div>
 </form>
-
 </div>
 {% endblock %}

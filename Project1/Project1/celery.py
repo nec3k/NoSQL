@@ -1,5 +1,5 @@
 import os
-from celery import Celery
+from celery import Celery, signals
 
 
 # Set the default Django settings module for the 'celery' program.
@@ -18,27 +18,3 @@ app.autodiscover_tasks()
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):
     print(f'Request: {self.request!r}')
-
-from celery import states
-from celery.signals import before_task_publish
-
-
-@before_task_publish.connect
-def create_task_result_on_publish(sender=None, headers=None, body=None, **kwargs):
-    # Tahle funkce zalozi task v DB uz kdyz je ve stavu pending ...
-    # Jinak by se tam hodili az pri stavu STARTED ...
-    # Viz https://github.com/celery/django-celery-results/issues/286
-    from django_celery_results.models import TaskResult
-    if "task" not in headers:
-        return
-
-    TaskResult.objects.store_result(
-        "application/json",
-        "utf-8",
-        headers["id"],
-        None,
-        states.PENDING,
-        task_name=headers["task"],
-        task_args=headers["argsrepr"],
-        task_kwargs=headers["kwargsrepr"],
-    )

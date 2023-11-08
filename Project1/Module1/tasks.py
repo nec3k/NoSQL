@@ -9,6 +9,7 @@ from celery import shared_task
 from Module1.utils.ytdutils import FilenameCollectorPP
 from Module1.models.download_request import DownloadRequest
 from Module1.models.downloaded_file import DownloadedFile
+import Module1.apps
 
 
 @shared_task
@@ -18,9 +19,6 @@ def download_items(url: str, ydl_opts: dict, playlist: bool, output_dir: str, dl
     ydl_opts["nowarnings"] = True
     ydl_opts["noplaylist"] = not playlist
     ydl_opts["outtmpl"] = os.path.join(output_dir, ydl_opts["outtmpl"])
-    for idx, pp in enumerate(ydl_opts.get("postprocessors", [])):
-        if pp.get("key") == "MetadataParser" and pp.get("when") == "pre_process":
-            ydl_opts["postprocessors"][idx]["actions"].append((yt_dlp.postprocessor.MetadataParserPP.Actions.INTERPRET, 'artist', r'(?P<creator>[^,]+)'))
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.cache.remove()
         filename_collector = FilenameCollectorPP()
