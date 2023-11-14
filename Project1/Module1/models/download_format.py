@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.cache import cache
+from django import forms
 
 
 class DownloadFormat(models.Model): 
@@ -15,3 +16,21 @@ class DownloadFormat(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    def get_enabled_formats_as_choices(from_cache = True):
+        cachekey = "enabled_format_choices"
+        cache_time = 60
+        if from_cache:
+            result = cache.get(cachekey)
+        if result is None or not from_cache:
+            result = list(forms.ModelChoiceField(DownloadFormat.objects.filter(enabled=True)).choices)
+            cache.set(cachekey, result, cache_time)
+        return result
+    
+    def get_format_from_cache(format_id):
+        cachekey = f"downloader_format_id={format_id}"
+        cache_time = 60*5
+        result = cache.get(cachekey)
+        if result is None:
+            result = DownloadFormat.objects.get(id=format_id)
+            cache.set(cachekey, result, cache_time)
+        return result

@@ -36,10 +36,10 @@ def downloader(request):
         if form.is_valid():
             form_data = form.cleaned_data
             stripped_urls = map(lambda x: x.strip(), form_data.get("content", "").split("\n"))
-            playlist = form_data.get("playlist", False)
-            selected_format = form_data.get("format")
-            output_dir = os.path.join(MEDIA_ROOT, request.user.username)
             unique_urls = dict.fromkeys(stripped_urls).keys()
+            playlist = form_data.get("playlist", False)
+            selected_format = DownloadFormat.get_format_from_cache(format_id = form_data.get("format")) 
+            output_dir = os.path.join(MEDIA_ROOT, request.user.username)
             added_to_queue_count = 0
             for url in unique_urls:
                 if len(url) == 0:

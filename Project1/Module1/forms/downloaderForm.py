@@ -9,4 +9,5 @@ from django.core.cache import cache
 class DownloaderForm(forms.Form):
     content = forms.CharField(label="Odkazy", max_length=25600, widget=Textarea(attrs={"rows": 8, "class": "textarr"}))
     playlist = forms.BooleanField(required=False, initial=False, label='Playlist', label_suffix="")
-    format = forms.ModelChoiceField(label="Formát", queryset=DownloadFormat.objects.filter(enabled=True), initial=1)
+    #format = forms.ModelChoiceField(label="Formát", queryset=DownloadFormat.objects.filter(enabled=True), initial=1)
+    format = forms.ChoiceField(label="Formát", choices=DownloadFormat.get_enabled_formats_as_choices(), initial=1)
