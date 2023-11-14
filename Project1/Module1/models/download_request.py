@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from Module1.models.download_format import DownloadFormat
 from django_celery_results.models import TaskResult
-from Project1.settings import MAX_URL_LENGTH
 
+MAX_URL_LENGTH = 512
 
 class DownloadRequest(models.Model):
     id = models.AutoField(primary_key=True)

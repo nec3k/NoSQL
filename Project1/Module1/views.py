@@ -2,11 +2,12 @@ import os
 
 from Module1.utils.fileutils import get_files_in_folder, delete_files
 from Module1.forms.fileForm import FileForm
+from Module1.models.download_format import DownloadFormat
 from Module1.forms.downloaderForm import DownloaderForm
-from Module1.models.download_request import DownloadRequest
+from Module1.models.download_request import DownloadRequest, MAX_URL_LENGTH
 from Module1.forms.loginForm import LoginForm
 from Module1.tasks import download_items
-from Project1.settings import MEDIA_ROOT, MEDIA_URL, MAX_URL_LENGTH
+from Project1.settings import MEDIA_ROOT
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
@@ -37,7 +38,7 @@ def downloader(request):
             stripped_urls = map(lambda x: x.strip(), form_data.get("content", "").split("\n"))
             playlist = form_data.get("playlist", False)
             selected_format = form_data.get("format")
-            output_dir = os.path.join(MEDIA_URL, request.user.username)
+            output_dir = os.path.join(MEDIA_ROOT, request.user.username)
             unique_urls = dict.fromkeys(stripped_urls).keys()
             added_to_queue_count = 0
             for url in unique_urls:
@@ -54,8 +55,9 @@ def downloader(request):
             messages.info(request, f"{added_to_queue_count} stahování zařazeno do fronty. ")
             return redirect("my_requests")
         else:
-            for error in form.errors.as_data().values():
-                messages.error(request, error)
+            print(form.fields["format"].choices)
+            for _, errors in form.errors.items():
+                messages.error(request,errors)
             return redirect("downloader")
     else:
         template = loader.get_template('downloader.html')
@@ -88,11 +90,13 @@ def file_manager(request):
         else:
             for _, errors in form.errors.items():
                 messages.error(request,errors)
+        redirect('file_manager')
     files = get_files_in_folder(folder)
     form = FileForm(file_list=files)
     template = loader.get_template('filemanager.html')
     content = {
         "title": "Soubory",
+        "username": username,
         "form": form,
         "action_url": "file_manager",
         "submit_button_text" : "Odstranit vybrané soubory",
@@ -105,13 +109,12 @@ def my_requests(request):
     page_size = 5
     template = loader.get_template('myrequests.html')
     page_number = request.GET.get('page', 1) 
-    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "-task__date_created")
-    dl_requests_with_files = dl_requests.prefetch_related("downloadedfile_set")
-    paginator_dl_req_w_files = Paginator(dl_requests_with_files, page_size)
-    page_dl_req_w_files = paginator_dl_req_w_files.get_page(page_number)
+    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "-task__date_created").select_related().prefetch_related("user","task","downloadedfile_set")
+    paginator_dl_requests = Paginator(dl_requests, page_size)
+    page = paginator_dl_requests.get_page(page_number)
     content = {
         "title": "Moje požadavky",
-        "dl_requests": page_dl_req_w_files
+        "dl_requests": list(page),
     }
     return HttpResponse(template.render(content, request))
 
@@ -151,8 +154,14 @@ def logout_page(request):
 
 @login_required(login_url='login_page')
 def protected_serve(request, path):
-    document_root = MEDIA_ROOT+'/'+request.user.username
-    return serve(request, path, document_root)
+    if request.user.is_superuser and request.GET.get('username') is not None:
+        username = request.GET.get('username')
+        messages.info(request, f"Prohlížíte si stažené soubory uživatele {username}.")
+    else:
+        username = request.user.username
+    path_safe = os.path.split(path)[1]
+    document_root = os.path.join(MEDIA_ROOT,username) 
+    return serve(request, path_safe, document_root)
 
 @login_required(login_url='login_page')
 def password_change(request):

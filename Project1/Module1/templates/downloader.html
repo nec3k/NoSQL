@@ -6,7 +6,6 @@
 {% block content %}
     <form action="{% url 'downloader' %}" method="POST">
         {% csrf_token %}
-        {% cache 600 formats %}
         {% for field in form %}
             {% if field.field.widget.input_type == 'checkbox' %}
             <div class="form-check my-3 mx-2">
@@ -20,7 +19,6 @@
             </div>
             {% endif %}
         {% endfor %}
-        {% endcache %}
         <div class="buttonBox">
             <input type="submit" value="Odeslat" class="btn btn-success my-2">
         </div>

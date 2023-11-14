@@ -12,5 +12,5 @@ urlpatterns = [
     path('login/', views.login_page, name='login_page'),
     path('password-change/', views.password_change, name='password_change'),
     path('logout/', views.logout_page, name='logout'),
-    re_path(rf'^{settings.MEDIA_URL[1:]}(?P<path>.*)$', views.protected_serve),
+    path('media/<str:path>', views.protected_serve, name='media_serve'),
 ]

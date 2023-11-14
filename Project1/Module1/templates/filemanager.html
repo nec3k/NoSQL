@@ -7,7 +7,11 @@
 {% block content %}
 
 <div>
-<form action="{% url 'file_manager' %}" method="POST">
+{% if user.is_superuser and user.username != username %}
+    <form action="{% url 'file_manager' %}?username={{ username }}" method="POST">
+{% else %}
+    <form action="{% url 'file_manager' %}" method="POST">
+{% endif %}
     {% csrf_token %}
     <table class="table">
         <thead>
@@ -24,7 +28,13 @@
             {% for name, description in form.files.field.widget.choices %}
             <tr>
                 <td><input id="id_files_{{ forloop.counter0 }}" type="checkbox" name="files" value="{{ name }}" class="form-check-input align-center shadow-none border border-danger rounded checkbox-danger"></td>
-                <td><label for="id_files_{{ forloop.counter0 }}"><a href="{% get_media_prefix %}{{ name }}" download class="h5">{{ description.filename }}</a><br></label></td>
+                <td><label for="id_files_{{ forloop.counter0 }}">
+                    {% if user.is_superuser and user.username != username %}
+                        <a href="{% get_media_prefix %}{{ name }}?username={{ username }}" download class="h5">{{ description.filename }}</a><br>
+                    {% else %}
+                        <a href="{% get_media_prefix %}{{ name }}" download class="h5">{{ description.filename }}</a><br>
+                    {% endif %}
+                </label></td>
                 <td><p class="h5">{{ description.size | divide:1_048_576 | floatformat:1 }} MB</td>
                 <td><p class="h5">{{ description.ctime|timestamp_to_datetime }}</td>
             </tr>
