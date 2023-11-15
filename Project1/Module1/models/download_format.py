@@ -21,7 +21,7 @@ class DownloadFormat(models.Model):
         cache_time = 60
         if from_cache:
             result = cache.get(cachekey)
-        if result is None or not from_cache:
+        if not from_cache or result is None:
             result = list(forms.ModelChoiceField(DownloadFormat.objects.filter(enabled=True)).choices)
             cache.set(cachekey, result, cache_time)
         return result
