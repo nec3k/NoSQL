@@ -6,45 +6,62 @@
 
 {% block content %}
 
-<div>
-{% if user.is_superuser and user.username != username %}
+<div class="space-y-6">
+<div class="overflow-x-auto border-b border-cyan-950/50 pb-6">
+    {% if user.is_superuser and user.username != username %}
     <form action="{% url 'file_manager' %}?username={{ username }}" method="POST">
 {% else %}
     <form action="{% url 'file_manager' %}" method="POST">
 {% endif %}
     {% csrf_token %}
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">
-                    <input id="select-all-items" class="d-none" type="checkbox" onclick="for(c in document.getElementsByName('files')) document.getElementsByName('files').item(c).checked = this.checked">
-                    <label for="select-all-items">❌</label></th>
-                <th scope="col">Název souboru</th>
-                <th scope="col">Velikost</th>
-                <th scope="col">Datum</th>
-            </tr>
-        </thead>
-        <tbody id="id_files" >
-            {% for name, description in form.files.field.widget.choices %}
-            <tr>
-                <td><input id="id_files_{{ forloop.counter0 }}" type="checkbox" name="files" value="{{ name }}" class="form-check-input align-center shadow-none border border-danger rounded checkbox-danger"></td>
-                <td><label for="id_files_{{ forloop.counter0 }}">
-                    {% if user.is_superuser and user.username != username %}
-                        <a href="{% get_media_prefix %}{{ name }}?username={{ username }}" download class="h5">{{ description.filename }}</a><br>
-                    {% else %}
-                        <a href="{% get_media_prefix %}{{ name }}" download class="h5">{{ description.filename }}</a><br>
-                    {% endif %}
-                </label></td>
-                <td><p class="h5">{{ description.size | divide:1_048_576 | floatformat:1 }} MB</td>
-                <td><p class="h5">{{ description.ctime|timestamp_to_datetime }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+    <table class="min-w-full divide-y-2 divide-cyan-950 bg-white">
+      <thead class="text-left font-semibold">
+        <tr>
+          <th class="px-4 py-1 text-center">
+            <input id="select-all-items" class="h-8 w-8 rounded border-cyan-950 text-cyan-700 focus:ring-cyan-700" type="checkbox" onclick="for(c in document.getElementsByName('files')) document.getElementsByName('files').item(c).checked = this.checked">
+          </th>
+          <th class="whitespace-nowrap px-4 py-2 text-cyan-950">
+            Název souboru
+          </th>
+          <th class="whitespace-nowrap px-4 py-2 text-cyan-950">
+            Velikost
+          </th>
+          <th class="whitespace-nowrap px-4 py-2 text-cyan-950">
+            Datum
+          </th>
+          <th class="px-4 py-2"></th>
+        </tr>
+      </thead>
+      <tbody id="id_files" class="divide-y divide-cyan-950/50">
+        {% for name, description in form.files.field.widget.choices %}
+        <tr>
+          <td class="px-4 py-1 text-center">
+            <input id="id_files_{{ forloop.counter0 }}" type="checkbox" name="files" value="{{ name }}" 
+            class="h-8 w-8 rounded border-cyan-950 text-cyan-700 focus:ring-cyan-700">
+          </td>            
+          <td><label for="id_files_{{ forloop.counter0 }}" class="whitespace-nowrap px-4 py-2 text-cyan-950">
+            {{ description.filename }}
+          </label></td>
+          <td><p class="whitespace-nowrap px-4 py-2 text-cyan-950">{{ description.size | divide:1_048_576 | floatformat:1 }} MB</td>
+          <td><p class="whitespace-nowrap px-4 py-2 text-cyan-950">{{ description.ctime|timestamp_to_datetime }}</td>    
+          <td class="whitespace-nowrap px-4 py-1 text-center">
+            <div class="flex justify-center">
+                <a href="{% get_media_prefix %}{{ name }}{% if user.is_superuser and user.username != username %}?username={{ username }}{% endif %}" download
+                class="flex rounded-md bg-cyan-900 px-2 py-1.5 text-white shadow-sm hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700">
+                <svg class="h-6 w-6" fill="none">
+                    <path d="M17 12L12 17M12 17L7 12M12 17V4M17 20H7" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg></a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
 
-    <div class="buttonBox">
-        <input type="submit" value="Odstranit vybrané soubory" class="btn btn-danger my-2">
-    </div>
-</form>
+  </div>
+
+<div class="flex justify-end">
+  <button type="submit" class="flex rounded-md bg-cyan-900 px-3 py-1.5 font-semibold leading-6 text-white shadow-sm hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700">Odstranit vybrané</button>
+</div>
 </div>
 {% endblock %}

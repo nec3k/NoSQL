@@ -3,55 +3,93 @@
 {% load add_css %}
 
 {% block content %}
-<!--a class="m-2 btn btn-dark" href="#" role="button">Obnovit stránku</a-->
-<hr class="mt-2 mb-3"/>
-<div class="table-responsive">
-<table class="table">
-  <thead>
+<div class="overflow-x-auto border-b border-cyan-950/50 pb-6">
+<table class="min-w-full divide-y-2 divide-cyan-950 bg-white">
+  <thead class="text-left font-semibold">
     <tr>
-      <th scope="col">Stav</th>
-      <th scope="col">Formát</th>
-      <th scope="col">Odesláno</th>
-      <th scope="col">Zpracováno</th>
-      <th scope="col">Stažené soubory</th>
-      <th scope="col">URL</th>
+      <th class="whitespace-nowrap px-4 py-2 text-cyan-950">Stav</th>
+      <th class="whitespace-nowrap px-4 py-2 text-cyan-950">Formát</th>
+      <th class="whitespace-nowrap px-4 py-2 text-cyan-950">Datum</th>
+      <th class="whitespace-nowrap px-4 py-2 text-cyan-950">Stažené soubory</th>
+      <th class="whitespace-nowrap px-4 py-2 text-cyan-950">URL</th>
     </tr>
   </thead>
-  <tbody>
-{% for i in dl_requests %}
-    <tr class="table-{{ i.state_css_class }}" style="white-space:nowrap">
-      <td>{{ i.task.status }}</td>
-      <td>{{ i.format }}</td>
-      <td>{{ i.task.date_done }}</td>
-      <td>{{ i.task.date_created }}</td>
-      <td>{{ i.downloadedfile_set.all|join:", " }}</td>
-      <td>{{ i.url }}</td>
+  <tbody id="id_files" class="divide-y divide-cyan-950/50">
+    {% for i in dl_requests %}
+    <tr>
+      <td> <p class="badge-{{ i.task.status|lower }}">{{ i.task.status }}</p></td>
+      <td> <p class="whitespace-nowrap px-4 py-2 text-cyan-950 text-center">{{ i.format.file_type|capfirst }}</p></td>
+      <td> <p class="whitespace-nowrap px-4 py-2 text-cyan-950">{{ i.task.date_created }}</p></td>
+      <td> <p class="whitespace-nowrap px-4 py-2 text-cyan-950">{{ i.downloadedfile_set.all|join:", " }}</p></td>
+      <td> <p class="whitespace-nowrap px-4 py-2 text-cyan-950">{{ i.url }}</p></td>
     </tr>
-{% endfor %}
+    {% endfor %}
   </tbody>
 </table>
 </div>
-{% if dl_requests.paginator.num_pages > 1 %}
-<div class="pagination d-flex justify-content-center my-2">
-  <span class="step-links">
-      {% if dl_requests.has_previous %}
-        <a href="?page=1" class="btn btn-dark">&laquo; první</a>
-        <a href="?page={{ dl_requests.previous_page_number }}" class="btn btn-dark">předchozí</a>
-      {% else %}
-        <a href="#" class="btn invisible">&laquo; první</a>
-        <a href="#" class="btn invisible">předchozí</a>
-      {% endif %}
-      
-      <span class="current-page mx-2">Stránka {{ dl_requests.number }} z {{ dl_requests.paginator.num_pages }}</span>
-      
-      {% if dl_requests.has_next %}
-          <a href="?page={{ dl_requests.next_page_number }}" class="btn btn-dark">další</a>
-          <a href="?page={{ dl_requests.paginator.num_pages }}" class="btn btn-dark">poslední &raquo;</a>
-      {% else %}
-          <a href="#" class="btn invisible">další</a>
-          <a href="#" class="btn invisible">poslední &raquo;</a>
-      {% endif %}
-  </span>
+<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+  <div class=" sm:flex sm:flex-1 sm:items-center sm:justify-between">
+    <div>
+      <p class="text-sm text-cyan-900">
+        Zobrazeno
+        <span class="font-semibold">{{ dl_requests.start_index }}</span>
+        až
+        <span class="font-semibold">{{ dl_requests.end_index }}</span>
+        z
+        <span class="font-semibold">{{ dl_requests.paginator.object_list|length }}</span>
+        požadavků
+      </p>
+    </div>
+    {% if dl_requests.has_other_pages %}
+    <div>
+      <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+        {% if dl_requests.has_previous %}
+          <a href="?page=1" 
+          class="relative inline-flex items-center rounded-l-md px-2 py-1 text-cyan-950 ring-1 ring-inset ring-cyan-900 hover:bg-gray-100 focus:z-20 focus:outline-offset-0">
+            <span class="sr-only">První</span>
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M11 6L5 12L11 18M18 6L12 12L18 18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="?page={{ dl_requests.previous_page_number }}" 
+          class="relative inline-flex items-center px-2 py-1 text-cyan-950 ring-1 ring-inset ring-cyan-900 hover:bg-gray-100 focus:z-20 focus:outline-offset-0">
+            <span class="sr-only">Předchozí</span>
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M15 20L7 12L15 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        {% endif %}
+        <span class="relative z-10 inline-flex items-center bg-cyan-700 ring-cyan-900 ring-1 ring-inset px-4 py-1 font-bold text-lg text-white">{{ dl_requests.number }}</span>
+        {% if dl_requests.has_next %}
+          <a href="?page={{ dl_requests.next_page_number }}" 
+          class="relative inline-flex items-center px-2 py-1 text-cyan-950 ring-1 ring-inset ring-cyan-900 hover:bg-gray-100 focus:z-20 focus:outline-offset-0">
+            <span class="sr-only">Další</span>
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M9 20L17 12L9 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="?page={{ dl_requests.paginator.num_pages }}" 
+          class="relative inline-flex items-center rounded-r-md px-2 py-1 text-cyan-950 ring-1 ring-inset ring-cyan-900 hover:bg-gray-100 focus:z-20 focus:outline-offset-0">
+            <span class="sr-only">Poslední</span>
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M13 6L19 12L13 18M6 6L12 12L6 18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        {% else %}
+          <p class="relative inline-flex items-center px-2 py-1 invisible">
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M9 20L17 12L9 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </p>
+          <p class="relative inline-flex items-center rounded-r-md px-2 py-1 invisible">
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M13 6L19 12L13 18M6 6L12 12L6 18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </p>
+        {% endif %}
+      </nav>
+    </div>
+    {% endif %}
+  </div>
 </div>
-{% endif %}
 {% endblock %}

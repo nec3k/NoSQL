@@ -63,7 +63,7 @@ def downloader(request):
         template = loader.get_template('downloader.html')
         form = DownloaderForm()
         content = {
-            "title": "Youtube downloader",
+            "title": "Nové stahování",
             "form": form,
         }
         return HttpResponse(template.render(content, request))
@@ -73,8 +73,10 @@ def file_manager(request):
     if request.user.is_superuser and request.GET.get('username') is not None:
         username = request.GET.get('username')
         messages.info(request, f"Prohlížíte si stažené soubory uživatele {username}.")
+        title = f"Soubory uživatele {username}"
     else:
         username = request.user.username
+        title = f"Soubory"
     folder = os.path.join(MEDIA_ROOT, username)
 
     if request.method == "POST":
@@ -95,7 +97,7 @@ def file_manager(request):
     form = FileForm(file_list=files)
     template = loader.get_template('filemanager.html')
     content = {
-        "title": "Soubory",
+        "title": title,
         "username": username,
         "form": form,
         "action_url": "file_manager",
@@ -109,16 +111,15 @@ def my_requests(request):
     page_size = 5
     template = loader.get_template('myrequests.html')
     page_number = request.GET.get('page', 1) 
-    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "-task__date_created").select_related().prefetch_related("user","task","downloadedfile_set")
+    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "task__date_created").select_related().prefetch_related("user","task","downloadedfile_set")
     paginator_dl_requests = Paginator(dl_requests, page_size)
     page = paginator_dl_requests.get_page(page_number)
     content = {
         "title": "Moje požadavky",
-        "dl_requests": list(page),
+        "dl_requests": page,
     }
     return HttpResponse(template.render(content, request))
 
-@cache_page(60 * 15)
 @csrf_protect
 def login_page(request):
     if request.user.is_authenticated:
@@ -156,7 +157,6 @@ def logout_page(request):
 def protected_serve(request, path):
     if request.user.is_superuser and request.GET.get('username') is not None:
         username = request.GET.get('username')
-        messages.info(request, f"Prohlížíte si stažené soubory uživatele {username}.")
     else:
         username = request.user.username
     path_safe = os.path.split(path)[1]
