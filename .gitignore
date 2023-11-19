@@ -153,6 +153,7 @@ dmypy.json
 cython_debug/
 
 Project1/media
+Project1/Project1/static/admin
 Project1/static/admin
 
 # PyCharm
