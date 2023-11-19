@@ -1,57 +1,50 @@
 {% load static %}
+
 <!DOCTYPE html>
-<html lang="en">
+<html class="h-full bg-gray-100">
 <head>
     <meta charset="UTF-8">
-    <title>{{ title }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <title>YTD - {{ title }}</title>
+    <!--script src="https://cdn.tailwindcss.com"></script-->
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
-<body>
-<nav class="navbar navbar-expand navbar-dark bg-dark">
-	  {% if user.is_authenticated %}
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{% url 'downloader' %}">Downloader</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'file_manager' %}">Soubory</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{% url 'my_requests' %}">Moje požadavky</a>
-          </li>
-	</ul>  
-	  <ul class="ms-auto navbar-nav">
-	    {% if user.is_superuser %}                   
-	    <li class="nav-item me-5">
-			    <a class="nav-link active text-warning" href="{% url 'admin:index' %}">Administrace</a>
-		    </li>   
-	    {% endif %}
-	    <span class="navbar-text me-5">Jste příhlášen jako: {{ user.username }}</span>
-      <li class="nav-item">
-        <a class="nav-link active" href="{% url 'password_change' %}">Změna hesla</a>
-      </li>
-	    <li class="nav-item">
-              <a class="nav-link active" href="{% url 'logout' %}">Odhásit se</a>
-	    </li>  
-          </ul>
-	  {% endif %}
-</nav>
 
-<div class="container">
-  <h1 class="text-center my-3">{{ title }}</h1>
-  <div class="border border-dark border-2 rounded-3">
+<body class="h-full"><div class="min-h-full">
+{% if user.is_authenticated %}
+  {% include "navbar.html" %}
+{% endif %}
+
+<header class="bg-white shadow">
+  <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <h1 class="text-3xl text-cyan-950 font-bold tracking-tight {% if not user.is_authenticated %}text-center{% endif %}">{{ title }}</h1>
+  </div>
+</header>
+
+<main>
+  <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
     {% for message in messages %}
-    <div class="m-2 alert alert-{{message.level_tag}} alert-dismissible fade show" role="alert">
       {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
     {% endfor %}
+    <div class="bg-white p-6 rounded-xl">
     {% block content %}
     {% endblock %}
+    </div>
   </div>
-</div>
+</main>
 
-</body>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"
+	integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous">
+	</script>
+
+  <script>
+    // Alerty vykopirovat z teto stranky a udelat templatetag pro jejich zobrazovani asi ?? 
+    // https://flowbite.com/docs/components/alerts/#border-accent
+    // V alertu se potom udela tlacitko s tridou closealertbutton a funguje to
+  $(".closealertbutton").click(function (e) {
+      $(this).parent().hide(500)
+  })
+  </script>
+</div></body>
 </html>

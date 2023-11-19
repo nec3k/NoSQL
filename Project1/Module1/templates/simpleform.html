@@ -3,26 +3,30 @@
 {% load add_css %}
 
 {% block content %}
+
+<div class="my-10 sm:mx-auto sm:w-full sm:max-w-sm">
+
 {% if form.errors %}
-      {% for field in form %}
-        {% for error in field.errors %}
-        <div class="m-2 alert alert-danger alert-dismissible fade show" role="alert">
-            {{ error }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endfor %}
+  {% for field in form %}
+    {% for error in field.errors %}
+      {{ error }}
+    {% endfor %}
+  {% endfor %}
 {% endif %}
+
 <form action="{% url action_url %}" method="POST">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="form-group">
-                {{ field.label_tag }}
-                {{ field|add_css:"form-control" }}
-            </div>
-        {% endfor %}
-        <div class="buttonBox">
-            <input type="submit" value="{{ submit_button_text }}" class="btn btn-success my-2">
-        </div>
-    </form>
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label for="{{ field.auto_id }}" class="block font-semibold leading-6 text-cyan-950">{{ field.label }}: </label>
+      <div class="my-2">
+        {{ field|add_css:"block w-full rounded-md border-0 py-1.5 text-cyan-950 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-cyan-700 sm:leading-6" }}
+      </div>
+    </div>
+  {% endfor %}
+  <button type="submit" class="flex w-full justify-center rounded-md bg-cyan-900 px-3 py-1.5 font-semibold leading-6 text-white shadow-sm hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700">{{ submit_button_text }}</button>
+</form>
+
+</div>
+
 {% endblock %}

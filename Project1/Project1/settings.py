@@ -163,14 +163,6 @@ if DEBUG:
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
 
 
-MESSAGE_TAGS = {
-        messages.DEBUG: 'secondary',
-        messages.INFO: 'info',
-        messages.SUCCESS: 'success',
-        messages.WARNING: 'warning',
-        messages.ERROR: 'danger',
- }
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
