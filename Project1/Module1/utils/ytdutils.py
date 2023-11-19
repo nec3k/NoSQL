@@ -6,7 +6,7 @@ class FilenameCollectorPP(yt_dlp.postprocessor.common.PostProcessor):
     def __init__(self, outtmpl):
         super(FilenameCollectorPP, self).__init__(None)
         self.filenames = []
-        if os.path.split(outtmpl)[1].startswith("%(creator)s - "):
+        if str(os.path.split(outtmpl)[1]).startswith("%(creator)s - "):
             self.filename_starts_w_creator = True
         else:
             self.filename_starts_w_creator = False

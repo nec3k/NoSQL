@@ -18,10 +18,11 @@ def download_items(url: str, ydl_opts: dict, playlist: bool, output_dir: str, dl
     ydl_opts["noprogress"] = True
     ydl_opts["nowarnings"] = True
     ydl_opts["noplaylist"] = not playlist
-    ydl_opts["outtmpl"] = os.path.join(output_dir, ydl_opts["outtmpl"])
+    outtmpl_path = os.path.join(output_dir, ydl_opts["outtmpl"])
+    ydl_opts["outtmpl"] = outtmpl_path
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.cache.remove()
-        filename_collector = FilenameCollectorPP()
+        filename_collector = FilenameCollectorPP(outtmpl_path)
         ydl.add_post_processor(filename_collector)
         ydl.download([url])
         DownloadedFile.objects.bulk_create([DownloadedFile(filename=filename, request=DownloadRequest.objects.get(pk=dl_req_id)) for filename in filename_collector.filenames])
