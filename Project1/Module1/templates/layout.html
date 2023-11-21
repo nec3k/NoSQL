@@ -1,12 +1,13 @@
 {% load static %}
+{% load display_alert %}
 
 <!DOCTYPE html>
 <html class="h-full bg-gray-100">
 <head>
-    <meta charset="UTF-8">
-    <title>YTD - {{ title }}</title>
-    <!--script src="https://cdn.tailwindcss.com"></script-->
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  <meta charset="UTF-8">
+  <title>YTD - {{ title }}</title>
+  <!--script src="https://cdn.tailwindcss.com"></script-->
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 
 <body class="h-full"><div class="min-h-full">
@@ -14,37 +15,33 @@
   {% include "navbar.html" %}
 {% endif %}
 
+
 <header class="bg-white shadow">
   <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
     <h1 class="text-3xl text-cyan-950 font-bold tracking-tight {% if not user.is_authenticated %}text-center{% endif %}">{{ title }}</h1>
   </div>
 </header>
 
+
 <main>
-  <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-7xl py-6  px-4 sm:px-6 lg:px-8">
     {% for message in messages %}
-      {{ message }}
+      {% display_alert message.level_tag message.message %}
     {% endfor %}
+    {% if form.errors %}
+      {% for field in form %}
+        {% for error in field.errors %}
+          {% display_alert 'error' error %}
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
     <div class="bg-white p-6 rounded-xl">
-    {% block content %}
-    {% endblock %}
+      {% block content %}
+      {% endblock %}
     </div>
   </div>
 </main>
 
 
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js"
-	integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous">
-	</script>
-
-  <script>
-    // Alerty vykopirovat z teto stranky a udelat templatetag pro jejich zobrazovani asi ?? 
-    // https://flowbite.com/docs/components/alerts/#border-accent
-    // V alertu se potom udela tlacitko s tridou closealertbutton a funguje to
-  $(".closealertbutton").click(function (e) {
-      $(this).parent().hide(500)
-  })
-  </script>
 </div></body>
 </html>

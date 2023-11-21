@@ -3,7 +3,36 @@
 @tailwind utilities;
 
 
-.badge-failure {@apply inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-bold text-red-700 ring-1 ring-inset ring-red-600/10; }
-.badge-pending {@apply inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-bold text-gray-600 ring-1 ring-inset ring-gray-500/10; }
-.badge-started {@apply inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-bold text-yellow-800 ring-1 ring-inset ring-yellow-600/20; }
-.badge-success {@apply inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-bold text-green-700 ring-1 ring-inset ring-green-600/20; }
+.badge-failure {@apply inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-bold text-red-900 ring-1 ring-inset ring-red-700; }
+.badge-pending {@apply inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-bold text-gray-900 ring-1 ring-inset ring-gray-700; }
+.badge-started {@apply inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-bold text-yellow-900 ring-1 ring-inset ring-yellow-700; }
+.badge-success {@apply inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-bold text-green-900 ring-1 ring-inset ring-green-700; }
+
+.alert-info {@apply flex items-center p-4 mb-4 text-cyan-900 rounded-lg bg-cyan-50 ring-1 ring-inset ring-cyan-700;}
+.alert-info button {@apply ms-auto inline-flex items-center justify-center h-8 w-8 rounded-md bg-cyan-900  font-semibold text-white shadow-sm hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700
+px-2 min-w-[2rem];}
+
+.alert-warning {@apply flex items-center p-4 mb-4 text-yellow-900 rounded-lg bg-yellow-50 ring-1 ring-inset ring-yellow-700;}
+.alert-warning button {@apply ms-auto inline-flex items-center justify-center h-8 w-8 rounded-md bg-yellow-900  font-semibold text-white shadow-sm hover:bg-yellow-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-700
+px-2 min-w-[2rem];}
+
+
+.alert-error {@apply flex items-center p-4 mb-4 text-red-900 rounded-lg bg-red-50 ring-1 ring-inset ring-red-700;}
+.alert-error button {@apply ms-auto inline-flex items-center justify-center h-8 w-8 rounded-md bg-red-900  font-semibold text-white shadow-sm hover:bg-red-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700
+px-2 min-w-[2rem];}
+
+.alert-success {@apply flex items-center p-4 mb-4 text-green-900 rounded-lg bg-green-50 ring-1 ring-inset ring-green-700;}
+.alert-success button {@apply ms-auto inline-flex items-center justify-center h-8 w-8 rounded-md bg-green-900  font-semibold text-white shadow-sm hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700
+px-2 min-w-[2rem];}
+
+#table-sortable .table-sortable-col {
+	@apply cursor-pointer rounded-t-md hover:bg-black/5;
+}
+
+#table-sortable .th-sort-asc{
+	@apply bg-black/10 rounded-t-md after:content-['\25b4'];
+}
+
+#table-sortable .th-sort-desc {
+	@apply bg-black/10 rounded-t-md after:content-['\25be'];
+}

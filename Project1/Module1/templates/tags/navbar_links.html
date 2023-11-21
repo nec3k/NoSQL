@@ -1,0 +1,7 @@
+<a class="{% if url_name == 'downloader' %}bg-cyan-900 text-white{% else %}text-gray-200 hover:bg-cyan-700 hover:text-white{% endif %} {% if mobile %} block text-base {% endif %} rounded-md px-3 py-2 font-medium" href="{% url 'downloader' %}">Nové stahování</a>
+<a class="{% if url_name == 'file_manager' %}bg-cyan-900 text-white{% else %}text-gray-200 hover:bg-cyan-700 hover:text-white{% endif %} {% if mobile %} block text-base {% endif %} rounded-md px-3 py-2 font-medium" href="{% url 'file_manager' %}">Soubory</a>
+<a class="{% if url_name == 'my_requests' %}bg-cyan-900 text-white{% else %}text-gray-200 hover:bg-cyan-700 hover:text-white{% endif %} {% if mobile %} block text-base {% endif %} rounded-md px-3 py-2 font-medium" href="{% url 'my_requests' %}">Moje požadavky</a>
+<a class="{% if url_name == 'password_change' %}bg-cyan-900 text-white{% else %}text-gray-200 hover:bg-cyan-700 hover:text-white{% endif %} {% if mobile %} block text-base {% endif %} rounded-md px-3 py-2 font-medium" href="{% url 'password_change' %}">Změna hesla</a>
+{% if user.is_superuser %}
+    <a class="text-yellow-200 hover:bg-cyan-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium" href="{% url 'admin:index' %}">Administrace</a>
+{% endif %}

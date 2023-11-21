@@ -3,36 +3,39 @@
 {% load add_css %}
 {% load divide %}
 {% load timestamp_to_datetime %}
+{% load display_button %}
 
 {% block content %}
-
+<div class="flex justify-end">
+  <button onclick="refreshData();" class="flex rounded-md bg-cyan-900 px-3 py-1.5 font-semibold leading-6 text-white shadow-sm hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700">Refresh</button>
+</div>
 <div class="space-y-6">
 <div class="overflow-x-auto border-b border-cyan-950/50 pb-6">
-    {% if user.is_superuser and user.username != username %}
+{% if user.is_superuser and user.username != username %}
     <form action="{% url 'file_manager' %}?username={{ username }}" method="POST">
 {% else %}
     <form action="{% url 'file_manager' %}" method="POST">
 {% endif %}
     {% csrf_token %}
-    <table class="min-w-full divide-y-2 divide-cyan-950 bg-white">
+    <table id="table-sortable" class="min-w-full divide-y-2 divide-cyan-950 bg-white">
       <thead class="text-left font-semibold">
         <tr>
           <th class="px-4 py-1 text-center">
             <input id="select-all-items" class="h-8 w-8 rounded border-cyan-950 text-cyan-700 focus:ring-cyan-700" type="checkbox" onclick="for(c in document.getElementsByName('files')) document.getElementsByName('files').item(c).checked = this.checked">
           </th>
-          <th class="whitespace-nowrap px-4 py-2 text-cyan-950">
+          <th class="table-sortable-col whitespace-nowrap px-4 py-2 text-cyan-950" data-column="filename" data-order="asc">
             Název souboru
           </th>
-          <th class="whitespace-nowrap px-4 py-2 text-cyan-950">
+          <th class="table-sortable-col whitespace-nowrap px-4 py-2 text-cyan-950" data-column="size" data-order="asc">
             Velikost
           </th>
-          <th class="whitespace-nowrap px-4 py-2 text-cyan-950">
+          <th class="table-sortable-col whitespace-nowrap px-4 py-2 text-cyan-950" data-column="ctime" data-order="asc">
             Datum
           </th>
           <th class="px-4 py-2"></th>
         </tr>
       </thead>
-      <tbody id="id_files" class="divide-y divide-cyan-950/50">
+      <tbody id="table-sortable-body" class="divide-y divide-cyan-950/50">
         {% for name, description in form.files.field.widget.choices %}
         <tr>
           <td class="px-4 py-1 text-center">
@@ -59,9 +62,120 @@
     </table>
 
   </div>
+  
+  {% display_button 'Odstranit vybrané' %}
 
-<div class="flex justify-end">
-  <button type="submit" class="flex rounded-md bg-cyan-900 px-3 py-1.5 font-semibold leading-6 text-white shadow-sm hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700">Odstranit vybrané</button>
 </div>
-</div>
+
+<script>
+  var table = document.querySelector('#table-sortable');
+  var thElements = table.querySelectorAll('th.table-sortable-col');
+
+  var lastSortedCol = 'filename';
+  var lastSortedOrder = 'asc';
+
+  let urlParams = (new URL(document.location)).searchParams;
+  var usernameParam;
+  if (urlParams.has("username")){
+    usernameParam = `?username=${urlParams.get("username")}`;
+  } else {
+    usernameParam = "";
+  }
+
+  thElements.forEach(function(th) {4
+      th.addEventListener('click', function() {
+          var column = th.getAttribute('data-column');
+          var order = th.getAttribute('data-order');
+          table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
+          th.classList.add(`th-sort-${order}`);
+
+          if (order == 'desc') {
+              th.setAttribute('data-order', 'asc');
+              //myArray = myArray.sort((a, b) => a[column] > b[column] ? 1 : -1);
+          } else {
+              th.setAttribute('data-order', 'desc');
+              //myArray = myArray.sort((a, b) => a[column] < b[column] ? 1 : -1);
+          }
+          lastSortedCol = column;
+          lastSortedOrder = order;
+          fetchDataAndBuildTable(column, order);
+      });
+  });
+  
+  function fetchDataAndBuildTable(sortColumn, sortOrder) {
+    // Fetch data from API
+    fetch(`/api/files${usernameParam}`)
+        .then(response => response.json())
+        .then(data => {
+            if (sortColumn && sortOrder) {
+                data.files.sort((a, b) => {
+                    const aValue = a[sortColumn];
+                    const bValue = b[sortColumn];
+                     // Numerické porovnání, pokud jsou hodnoty čísla
+                    const numericComparison = typeof aValue === 'number' && typeof bValue === 'number' ? aValue - bValue : 0;
+
+                    // Case insensitive porovnání řetězců
+                    const stringComparison = String(aValue).localeCompare(String(bValue), 'cs', { sensitivity: 'base' });
+
+                    // Rozhodnutí podle směru řazení (asc nebo desc)
+                    return sortOrder === 'asc' ? numericComparison || stringComparison : (numericComparison || stringComparison) * -1;
+                });
+            }
+
+            buildTable(data.files);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+}
+
+  function formatDate(timestamp) {
+    const months = [
+        'ledna', 'února', 'března', 'dubna', 'května', 'června',
+        'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'
+    ];
+
+    const dateTime = new Date(timestamp);
+    const day = dateTime.getDate();
+    const month = months[dateTime.getMonth()];
+    const year = dateTime.getFullYear();
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+
+    return `${day}. ${month} ${year} ${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
+}
+
+  function buildTable(data) {
+      var tbody = table.querySelector('#table-sortable-body');
+      tbody.innerHTML = '';
+      document.getElementById('select-all-items').checked= false;
+      for (var i = 0; i < data.length; i++) {
+          var row = `<tr>
+            <td class="px-4 py-1 text-center">
+              <input id="id_files_${i}" type="checkbox" name="files" value="${data[i].filename}" 
+              class="h-8 w-8 rounded border-cyan-950 text-cyan-700 focus:ring-cyan-700">
+            </td>            
+            <td><label for="id_files_${i}" class="whitespace-nowrap px-4 py-2 text-cyan-950">
+              ${data[i].filename}
+            </label></td>
+            <td><p class="whitespace-nowrap px-4 py-2 text-cyan-950">${ (data[i].size/1024/1024).toFixed(1) } MB</td>
+            <td><p class="whitespace-nowrap px-4 py-2 text-cyan-950">${ formatDate(data[i].ctime*1000) }</td>    
+            <td class="whitespace-nowrap px-4 py-1 text-center">
+              <div class="flex justify-center">
+                  <a href="/media/${data[i].filename}${usernameParam}" download
+                  class="flex rounded-md bg-cyan-900 px-2 py-1.5 text-white shadow-sm hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700">
+                  <svg class="h-6 w-6" fill="none">
+                      <path d="M17 12L12 17M12 17L7 12M12 17V4M17 20H7" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg></a>
+              </div>
+            </td>
+          </tr>`;
+          tbody.innerHTML += row;
+      }
+  }
+  
+  function refreshData(){
+    fetchDataAndBuildTable(lastSortedCol, lastSortedOrder);
+  }
+
+</script>
+
 {% endblock %}

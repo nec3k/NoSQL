@@ -1,6 +1,9 @@
 import os
+from urllib.parse import urlencode
 
-from Module1.utils.fileutils import get_files_in_folder, delete_files
+from django.urls import reverse
+
+from Module1.utils.fileutils import get_files_in_folder, get_files_in_folder_as_choices, delete_files
 from Module1.forms.fileForm import FileForm
 from Module1.models.download_format import DownloadFormat
 from Module1.forms.downloaderForm import DownloaderForm
@@ -15,7 +18,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.views.static import serve
@@ -54,25 +57,20 @@ def downloader(request):
                     new_dl_req.save()
             messages.info(request, f"{added_to_queue_count} stahování zařazeno do fronty. ")
             return redirect("my_requests")
-        else:
-            print(form.fields["format"].choices)
-            for _, errors in form.errors.items():
-                messages.error(request,errors)
-            return redirect("downloader")
     else:
-        template = loader.get_template('downloader.html')
         form = DownloaderForm()
-        content = {
-            "title": "Nové stahování",
-            "form": form,
-        }
-        return HttpResponse(template.render(content, request))
+    template = loader.get_template('downloader.html')
+    content = {
+        "title": "Nové stahování",
+        "form": form,
+    }
+    return HttpResponse(template.render(content, request))
 
 @login_required(login_url='login_page')
 def file_manager(request):
     if request.user.is_superuser and request.GET.get('username') is not None:
         username = request.GET.get('username')
-        messages.info(request, f"Prohlížíte si stažené soubory uživatele {username}.")
+        #messages.info(request, f"Prohlížíte si stažené soubory uživatele {username}.")
         title = f"Soubory uživatele {username}"
     else:
         username = request.user.username
@@ -80,7 +78,7 @@ def file_manager(request):
     folder = os.path.join(MEDIA_ROOT, username)
 
     if request.method == "POST":
-        files = get_files_in_folder(folder)
+        files = get_files_in_folder_as_choices(folder)
         form = FileForm(files, request.POST)
         if form.is_valid():
             form_files = form.cleaned_data["files"]
@@ -88,22 +86,25 @@ def file_manager(request):
                 delete_files(folder, form_files)
                 messages.info(request, f"Úspěšně jsem odstranil {len(form_files)} souborů. ")
             else: 
-                messages.warning(request, "Nebyl vybrán žádný soubor k odtranění! ")
+                messages.warning(request, "Nebyl vybrán žádný soubor k odtranění. ")
         else:
             for _, errors in form.errors.items():
                 messages.error(request,errors)
-        redirect('file_manager')
-    files = get_files_in_folder(folder)
-    form = FileForm(file_list=files)
-    template = loader.get_template('filemanager.html')
-    content = {
-        "title": title,
-        "username": username,
-        "form": form,
-        "action_url": "file_manager",
-        "submit_button_text" : "Odstranit vybrané soubory",
-    }
-    return HttpResponse(template.render(content, request))
+        base_url = reverse('file_manager')
+        query_string =  f"?{urlencode({'username': username})}" if request.user.is_superuser else ""
+        return redirect(f"{base_url}{query_string}")
+    else:
+        files = get_files_in_folder_as_choices(folder)
+        form = FileForm(file_list=files)
+        template = loader.get_template('filemanager.html')
+        content = {
+            "title": title,
+            "username": username,
+            "form": form,
+            "action_url": "file_manager",
+            "submit_button_text" : "Odstranit vybrané soubory",
+        }
+        return HttpResponse(template.render(content, request))
 
 
 @login_required(login_url='login_page')
@@ -159,9 +160,9 @@ def protected_serve(request, path):
         username = request.GET.get('username')
     else:
         username = request.user.username
-    path_safe = os.path.split(path)[1]
+    filename = os.path.split(path)[1]
     document_root = os.path.join(MEDIA_ROOT,username) 
-    return serve(request, path_safe, document_root)
+    return serve(request, filename, document_root)
 
 @login_required(login_url='login_page')
 def password_change(request):
@@ -182,3 +183,10 @@ def password_change(request):
         "submit_button_text" : "Změnit heslo",
     }
     return HttpResponse(template.render(content, request))
+
+@login_required
+def api_files(request):
+    username = request.GET.get('username') if request.user.is_superuser and request.GET.get('username') is not None else request.user.username
+    folder = os.path.join(MEDIA_ROOT, username)
+    files = get_files_in_folder(folder)
+    return JsonResponse({"files": files})

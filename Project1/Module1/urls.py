@@ -13,4 +13,5 @@ urlpatterns = [
     path('password-change/', views.password_change, name='password_change'),
     path('logout/', views.logout_page, name='logout'),
     path('media/<str:path>', views.protected_serve, name='media_serve'),
+    path('api/files', views.api_files, name="api_files"),
 ]
