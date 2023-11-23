@@ -31,6 +31,7 @@ from django_celery_results.models import TaskResult
 #@user_passes_test(is_superuser)
 #def controler(req):
 
+MY_REQUESTS_PAGE_SIZE = 5
 
 @login_required(login_url='login_page')
 def downloader(request):
@@ -109,11 +110,10 @@ def file_manager(request):
 
 @login_required(login_url='login_page')
 def my_requests(request):
-    page_size = 5
     template = loader.get_template('myrequests.html')
     page_number = request.GET.get('page', 1) 
-    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "task__date_created").select_related().prefetch_related("user","task","downloadedfile_set")
-    paginator_dl_requests = Paginator(dl_requests, page_size)
+    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "task__date_created").select_related("task", "format").prefetch_related("downloadedfile_set")
+    paginator_dl_requests = Paginator(dl_requests, MY_REQUESTS_PAGE_SIZE)
     page = paginator_dl_requests.get_page(page_number)
     content = {
         "title": "Moje požadavky",
@@ -190,3 +190,11 @@ def api_files(request):
     folder = os.path.join(MEDIA_ROOT, username)
     files = get_files_in_folder(folder)
     return JsonResponse({"files": files})
+
+@login_required
+def api_my_requests(request):
+    page_number = request.GET.get('page', 1) 
+    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "task__date_created").select_related("task", "format").prefetch_related("downloadedfile_set")
+    paginator_dl_requests = Paginator(dl_requests, MY_REQUESTS_PAGE_SIZE)
+    page = paginator_dl_requests.get_page(page_number)
+    return JsonResponse({"my_requests": list(page.object_list)})

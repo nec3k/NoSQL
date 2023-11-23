@@ -14,4 +14,5 @@ urlpatterns = [
     path('logout/', views.logout_page, name='logout'),
     path('media/<str:path>', views.protected_serve, name='media_serve'),
     path('api/files', views.api_files, name="api_files"),
+    path('api/my_requests', views.api_my_requests, name="api_my_requests"),
 ]
