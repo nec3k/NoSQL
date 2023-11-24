@@ -31,17 +31,12 @@ class DownloadRequest(models.Model):
         files_str = ";".join([soubor.filename for soubor in files])
         return files_str
 
-    def state_css_class(self):
-        if self.task_status == 'SUCCESS':
-            return 'success'
-        elif self.task_status == 'STARTED':
-            return 'warning'
-        elif self.task_status == 'PENDING':
-            return 'info'
-        elif self.task_status == 'FAILURE':
-            return 'danger'
-        else:
-            return 'secondary'
-
+    def as_dict(self):
+        return {"id": self.id,
+                "url": self.url,
+                "task": self.task.as_dict,
+                "user__username": self.user.username,
+                "format__file_type": self.format.file_type}
+    
     def __str__(self) -> str:
         return f"Požadavek id: {self.id}, založil: {self.user}"
