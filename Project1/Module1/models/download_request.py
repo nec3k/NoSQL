@@ -34,7 +34,8 @@ class DownloadRequest(models.Model):
     def as_dict(self):
         return {"id": self.id,
                 "url": self.url,
-                "task": self.task.as_dict,
+                "task__status": self.task.status,
+                "task__date_created": self.task.date_created.timestamp(),
                 "user__username": self.user.username,
                 "format__file_type": self.format.file_type}
     

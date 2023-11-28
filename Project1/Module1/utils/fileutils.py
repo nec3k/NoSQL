@@ -1,13 +1,14 @@
 import os
 import pathlib
 
-def get_files_in_folder(folder_path) -> list:
+def get_files_in_folder(folder_path, sorted=True) -> list:
     if not os.path.isdir(folder_path):
         return []
     files_in_folder = list(filter(lambda entry: entry.is_file(), pathlib.Path(folder_path).iterdir()))
     files_info = map(lambda file: {"filename": file.name, "size": file.stat().st_size, "ctime": file.stat().st_ctime}, files_in_folder)
     files = list(files_info)
-    files.sort(key=lambda x: x['filename'].casefold())
+    if sorted:
+        files.sort(key=lambda x: x['filename'].casefold())
     return files
 
 def get_files_in_folder_as_choices(folder_path) -> list:

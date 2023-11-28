@@ -112,7 +112,7 @@ def file_manager(request):
 def my_requests(request):
     template = loader.get_template('myrequests.html')
     page_number = request.GET.get('page', 1) 
-    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "task__date_created").select_related("task", "format").prefetch_related("downloadedfile_set")
+    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_created").select_related("task", "format").prefetch_related("downloadedfile_set")
     paginator_dl_requests = Paginator(dl_requests, MY_REQUESTS_PAGE_SIZE)
     page = paginator_dl_requests.get_page(page_number)
     content = {
@@ -188,13 +188,18 @@ def password_change(request):
 def api_files(request):
     username = request.GET.get('username') if request.user.is_superuser and request.GET.get('username') is not None else request.user.username
     folder = os.path.join(MEDIA_ROOT, username)
-    files = get_files_in_folder(folder)
+    files = get_files_in_folder(folder, sorted=False)
     return JsonResponse({"files": files})
 
 @login_required
 def api_my_requests(request):
     page_number = request.GET.get('page', 1) 
-    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_done", "task__date_created").select_related("task", "format").prefetch_related("downloadedfile_set")
+    dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_created").select_related("task", "format").prefetch_related("downloadedfile_set")
     paginator_dl_requests = Paginator(dl_requests, MY_REQUESTS_PAGE_SIZE)
     page = paginator_dl_requests.get_page(page_number)
-    return JsonResponse({"my_requests": list(page.object_list)})
+    serializable_page = []
+    for obj in page:
+        temp_dict = obj.as_dict()
+        temp_dict.update({"downloaded_files": [file.filename for file in obj.downloadedfile_set.all()]})
+        serializable_page.append(temp_dict)
+    return JsonResponse({"my_requests": serializable_page})
