@@ -16,9 +16,10 @@ class FilenameCollectorPP(yt_dlp.postprocessor.common.PostProcessor):
         filepath_splitted = os.path.split(filepath)
         filedir = filepath_splitted[0]
         filename = filepath_splitted[1]
-        if self.filename_starts_w_creator and filename.startswith("NA - "):
-            filename = filename[5:]
-            os.rename(filepath, os.path.join(filedir, filename))
+        if self.filename_starts_w_creator and filename.startswith("NA - "): # Pokud filename ma zacinat umelcem, ale v metadatech neni
+            filename = filename[5:]                                         # odstrani se prvnich 5 znaku('NA - ') a filename bude jen nazev videa
+        filename = filename.replace("#", "") # Hash('#') v nazvu zpusobuje chybu, potom to nejde stahnout pres web, proto se musi odstranit
+        os.rename(filepath, os.path.join(filedir, filename))
         self.filenames.append(filename)
         return [], information
     
