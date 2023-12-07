@@ -27,7 +27,7 @@ SECRET_KEY = '1t!w)rrbz@xqw2en0%josc8mw#&xh$e-!n(4rl3(-vl5q7s$(='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1']
 #ALLOWED_HOSTS = ['127.0.0.1', '10.0.0.170', 'ytd.ipmon.cz']
 
 
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #'django.contrib.sites',
     'Module1',
     'django_celery_results',
     #"debug_toolbar",
@@ -75,6 +76,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Project1.wsgi.application'
+
+SITE_ID=1
 
 CELERY_TASK_TIME_LIMIT = 45 * 60
 CELERY_BROKER_URL = 'redis://redis:6379'
@@ -162,6 +165,11 @@ if DEBUG:
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
 
+EMAIL_HOST = 'smtp.seznam.cz'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'user@example.com'
+EMAIL_HOST_PASSWORD = 'secret'
+EMAIL_USE_SSL = True
 
 LOGGING = {
     'version': 1,

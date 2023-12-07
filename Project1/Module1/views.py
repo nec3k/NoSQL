@@ -49,7 +49,7 @@ def downloader(request):
                 if len(url) == 0:
                     continue
                 elif len(url) > MAX_URL_LENGTH: 
-                    messages.error(f"{url} bude přeskočena, protože je příliš dlouhá ...")
+                    messages.error(request, f"{url} bude přeskočena, protože je příliš dlouhá ...")
                 else:
                     added_to_queue_count += 1
                     new_dl_req = DownloadRequest.objects.create(url=url, format=selected_format, user=request.user)
@@ -90,14 +90,14 @@ def file_manager(request):
                 messages.warning(request, "Nebyl vybrán žádný soubor k odtranění. ")
         else:
             for _, errors in form.errors.items():
-                messages.error(request,errors)
+                messages.error(request, errors)
         base_url = reverse('file_manager')
         query_string =  f"?{urlencode({'username': username})}" if request.user.is_superuser else ""
         return redirect(f"{base_url}{query_string}")
     else:
         files = get_files_in_folder_as_choices(folder)
         form = FileForm(file_list=files)
-        template = loader.get_template('filemanager.html')
+        template = loader.get_template('file_manager.html')
         content = {
             "title": title,
             "username": username,
@@ -110,7 +110,7 @@ def file_manager(request):
 
 @login_required(login_url='login_page')
 def my_requests(request):
-    template = loader.get_template('myrequests.html')
+    template = loader.get_template('my_requests.html')
     page_number = request.GET.get('page', 1) 
     dl_requests = DownloadRequest.objects.filter(user=request.user, task__isnull=False).order_by("-task__date_created").select_related("task", "format").prefetch_related("downloadedfile_set")
     paginator_dl_requests = Paginator(dl_requests, MY_REQUESTS_PAGE_SIZE)
@@ -136,13 +136,14 @@ def login_page(request):
             messages.error(request, 'Uživatelské jméno nebo heslo není správné!')
             next_url = 'login_page'
         return redirect(next_url)
-    template = loader.get_template('simpleform.html')
+    template = loader.get_template('login_page.html')
     form = LoginForm()
     content = {
         "title": "Přihlášení",
         "form": form,
         "action_url": "login_page",
         "submit_button_text" : "Přihlásit se",
+        "upper_text": "Zapomněli jste heslo ? "
     }
     return HttpResponse(template.render(content, request))
 
@@ -175,7 +176,7 @@ def password_change(request):
             redirect("downloader")
     else:
         form = PasswordChangeForm(user=request.user)
-    template = loader.get_template('simpleform.html')
+    template = loader.get_template('simple_form.html')
     content = {
         "title": "Změna hesla",
         "form": form,
