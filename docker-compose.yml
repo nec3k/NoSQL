@@ -28,6 +28,7 @@ services:
       - "5432:5432"
 
   celery_worker:
+    container_name: celery_worker
     build:
       context: .
       dockerfile: Dockerfile.worker
