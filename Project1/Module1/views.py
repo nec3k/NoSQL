@@ -49,7 +49,7 @@ def downloader(request):
                 if len(url) == 0:
                     continue
                 elif len(url) > MAX_URL_LENGTH: 
-                    messages.error(f"{url} bude přeskočena, protože je příliš dlouhá ...")
+                    messages.error(request, f"{url} bude přeskočena, protože je příliš dlouhá ...")
                 else:
                     added_to_queue_count += 1
                     new_dl_req = DownloadRequest.objects.create(url=url, format=selected_format, user=request.user)
@@ -90,7 +90,7 @@ def file_manager(request):
                 messages.warning(request, "Nebyl vybrán žádný soubor k odtranění. ")
         else:
             for _, errors in form.errors.items():
-                messages.error(request,errors)
+                messages.error(request, errors)
         base_url = reverse('file_manager')
         query_string =  f"?{urlencode({'username': username})}" if request.user.is_superuser else ""
         return redirect(f"{base_url}{query_string}")
