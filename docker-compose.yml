@@ -4,7 +4,7 @@ services:
     build: 
       context: .
       dockerfile: Dockerfile.app
-    container_name: django
+    container_name: django-pokus
     ports:
       - "8000:8000"
     volumes:
@@ -15,20 +15,20 @@ services:
 
   redis:
     image: redislabs/redismod
-    container_name: redis
+    container_name: redis-pokus
     ports:
       - "6379:6379"
 
   postgres:
     image: postgres:latest
-    container_name: postgres
+    container_name: postgres-pokus
     environment:
       POSTGRES_PASSWORD: qqqqqq
     ports:
       - "5432:5432"
 
   celery_worker:
-    container_name: celery_worker
+    container_name: celery_worker-pokus
     build:
       context: .
       dockerfile: Dockerfile.worker

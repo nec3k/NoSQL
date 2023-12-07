@@ -16,7 +16,6 @@ import Module1.apps
 def download_items(url: str, ydl_opts: dict, playlist: bool, output_dir: str, dl_req_id: int) -> None:
     ydl_opts["quiet"] = True
     ydl_opts["noprogress"] = True
-    ydl_opts["nowarnings"] = True
     ydl_opts["noplaylist"] = not playlist
     outtmpl_path = os.path.join(output_dir, ydl_opts["outtmpl"])
     ydl_opts["outtmpl"] = outtmpl_path

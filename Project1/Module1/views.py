@@ -171,7 +171,7 @@ def password_change(request):
         if form.is_valid():
             form.save()
             update_session_auth_hash(request, form.user)
-            messages.success("Změna hesla proběhla úspěšně. ")
+            messages.success(request, "Změna hesla proběhla úspěšně. ")
             redirect("downloader")
     else:
         form = PasswordChangeForm(user=request.user)

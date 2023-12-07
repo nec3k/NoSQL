@@ -28,4 +28,4 @@ tzdata==2023.3
 vine==5.0.0
 wcwidth==0.2.8
 websockets==11.0.3
-yt-dlp==2023.9.24
+yt-dlp==2023.11.16

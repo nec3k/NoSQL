@@ -195,12 +195,6 @@ LOGGING = {
             'filename': os.path.join(BASE_DIR, 'logs','requests.log'),
             'formatter': 'verbose',
         },
-        'ytd_errors_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs','ytd_errors.log'),
-            'formatter': 'verbose',
-        },
     },
     'loggers': {
         'django': {
@@ -211,10 +205,6 @@ LOGGING = {
             'handlers': ['request_file'],
             'level': 'ERROR',
             'propagate': False,
-        },
-        'ytd.errors': {
-            'handlers': ['ytd_errors_file'],
-            'level': 'ERROR',
         },
     }
 }
