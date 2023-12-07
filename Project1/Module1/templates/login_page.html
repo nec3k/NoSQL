@@ -7,7 +7,7 @@
 
 
 <div class="my-10 mx-auto sm:w-full max-w-md">
-    <form action="{% url 'password_reset' %}" method="POST">
+    <form action="{% url 'login_page' %}" method="POST">
         <div class="space-y-6">
         <div class="border-b border-cyan-950/50 pb-6">
             {% csrf_token %}
