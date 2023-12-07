@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% load static %}
+{% load add_css %}
+{% load display_button %}
+
+{% block content %}
+
+
+<div class="my-10 mx-auto sm:w-full max-w-md">
+    <form action="{% url 'password_reset' %}" method="POST">
+        <div class="space-y-6">
+        <div class="border-b border-cyan-950/50 pb-6">
+            {% csrf_token %}
+            {% for field in form %}
+            <div>
+              <label for="{{ field.auto_id }}" class="block font-semibold leading-6 text-cyan-950 text-lg">{{ field.label }}:</label>
+              <div class="my-2">
+                {{ field|add_css:"block w-full rounded-md border-cyan-950 py-1.5 text-cyan-950 shadow-sm ring-1 ring-inset ring-white placeholder:text-gray-400 focus:border focus:border-cyan-700 focus:ring-0 focus:outline-none focus-visible:outline-cyan-700 sm:leading-6" }}
+              </div>
+            </div>
+          {% endfor %}
+          <p class="leading-6 text-cyan-950 text-lg text-center mt-6">Zapomněli jste vaše heslo ? <a href="{% url 'password_reset' %}" class="ml-8 leading-6 text-cyan-700 text-lg underline hover:bg-cyan-50">Resetovat heslo</a></p>
+        </div>
+        {% display_button 'Odeslat' %}
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+

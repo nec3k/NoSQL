@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+{% load static %}
+{% load add_css %}
+{% load display_button %}
+
+{% block content %}
+{% display_button '<span class="font-semibold mr-1">Obnovit</span><svg class="h-6 w-6 " viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">    <path d="M20.9844 10H17M20.9844 10V6M20.9844 10L17.6569 6.34315C14.5327 3.21895 9.46734 3.21895 6.34315 6.34315C3.21895 9.46734 3.21895 14.5327 6.34315 17.6569C9.46734 20.781 14.5327 20.781 17.6569 17.6569C18.4407 16.873 19.0279 15.9669 19.4184 15" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>' 'refresh-button' %}
+<div class="overflow-x-auto border-b border-cyan-950/50 pb-6">
+<table id="table-refreshable" class="min-w-full divide-y-2 divide-cyan-950 bg-white">
+  <thead class="text-left font-semibold">
+    <tr>
+      <th class="whitespace-nowrap px-1 py-2 text-cyan-950">Stav</th>
+      <th class="whitespace-nowrap px-1 py-2 text-cyan-950 text-center">Formát</th>
+      <th class="whitespace-nowrap px-1 py-2 text-cyan-950 text-center">Datum</th>
+      <th class="whitespace-nowrap px-1 py-2 text-cyan-950 text-center">Stažené soubory</th>
+      <th class="whitespace-nowrap px-1 py-2 text-cyan-950 text-center">URL</th>
+    </tr>
+  </thead>
+  <tbody id="table-refreshable-body" class="divide-y divide-cyan-950/50">
+    {% for i in dl_requests %}
+    <tr>
+      <td> <p class="badge-{{ i.task.status|lower }} text-center">{{ i.task.status }}</p></td>
+      <td> <p class="whitespace-nowrap px-1 py-2 text-cyan-950 text-center">{{ i.format.file_type|capfirst }}</p></td>
+      <td> <p class="whitespace-nowrap px-1 py-2 text-cyan-950 text-center">{{ i.task.date_created }}</p></td>
+      <td class="max-w-xl sm:max-w-sm "> <p class="whitespace-nowrap px-1 py-2 text-cyan-950 truncate">{{ i.downloadedfile_set.all|join:", " }}</p></td>
+      <td class="text-center"> <a href="{{ i.url }}" class="whitespace-nowrap px-1 py-2 text-cyan-700 underline" target="_blank">Odkaz</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+  <div class=" sm:flex sm:flex-1 sm:items-center sm:justify-between">
+    <div>
+      <p class="text-sm text-cyan-900">
+        Zobrazeno
+        <span class="font-semibold">{{ dl_requests.start_index }}</span>
+        až
+        <span class="font-semibold">{{ dl_requests.end_index }}</span>
+        z
+        <span class="font-semibold">{{ dl_requests.paginator.object_list|length }}</span>
+        požadavků
+      </p>
+    </div>
+    {% if dl_requests.has_other_pages %}
+    <div>
+      <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+        {% if dl_requests.has_previous %}
+          <a href="?page=1" 
+          class="relative inline-flex items-center rounded-l-md px-1 py-1 text-cyan-950 ring-1 ring-inset ring-cyan-900 hover:bg-gray-100 focus:z-20 focus:outline-offset-0">
+            <span class="sr-only">První</span>
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M11 6L5 12L11 18M18 6L12 12L18 18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="?page={{ dl_requests.previous_page_number }}" 
+          class="relative inline-flex items-center px-1 py-1 text-cyan-950 ring-1 ring-inset ring-cyan-900 hover:bg-gray-100 focus:z-20 focus:outline-offset-0">
+            <span class="sr-only">Předchozí</span>
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M15 20L7 12L15 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        {% endif %}
+        <span class="relative z-10 inline-flex items-center bg-cyan-700 ring-cyan-900 ring-1 ring-inset px-4 py-1 font-bold text-lg text-white">{{ dl_requests.number }}</span>
+        {% if dl_requests.has_next %}
+          <a href="?page={{ dl_requests.next_page_number }}" 
+          class="relative inline-flex items-center px-1 py-1 text-cyan-950 ring-1 ring-inset ring-cyan-900 hover:bg-gray-100 focus:z-20 focus:outline-offset-0">
+            <span class="sr-only">Další</span>
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M9 20L17 12L9 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="?page={{ dl_requests.paginator.num_pages }}" 
+          class="relative inline-flex items-center rounded-r-md px-1 py-1 text-cyan-950 ring-1 ring-inset ring-cyan-900 hover:bg-gray-100 focus:z-20 focus:outline-offset-0">
+            <span class="sr-only">Poslední</span>
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M13 6L19 12L13 18M6 6L12 12L6 18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        {% else %}
+          <p class="relative inline-flex items-center px-1 py-1 invisible">
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M9 20L17 12L9 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </p>
+          <p class="relative inline-flex items-center rounded-r-md px-1 py-1 invisible">
+            <svg fill="none" class="stroke-cyan-950 h-6 w-6">
+              <path d="M13 6L19 12L13 18M6 6L12 12L6 18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </p>
+        {% endif %}
+      </nav>
+    </div>
+    {% endif %}
+  </div>
+</div>
+<script type="module"  src="{% static 'js/myrequests_table.js' %}"></script>
+{% endblock %}
