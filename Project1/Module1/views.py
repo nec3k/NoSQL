@@ -4,11 +4,13 @@ from urllib.parse import urlencode
 from django.urls import reverse
 
 from Module1.utils.fileutils import get_files_in_folder, get_files_in_folder_as_choices, delete_files
-from Module1.forms.fileForm import FileForm
+from Module1.forms.file_form import FileForm
 from Module1.models.download_format import DownloadFormat
-from Module1.forms.downloaderForm import DownloaderForm
+from Module1.forms.downloader_form import DownloaderForm
+from Module1.forms.user_format_preference_form import UserFormatPreferenceForm
+from Module1.forms.user_format_preference_form import UserFormatPreference
 from Module1.models.download_request import DownloadRequest, MAX_URL_LENGTH
-from Module1.forms.loginForm import LoginForm
+from Module1.forms.login_form import LoginForm
 from Module1.tasks import download_items
 from Project1.settings import MEDIA_ROOT
 from django.core.paginator import Paginator
@@ -42,7 +44,7 @@ def downloader(request):
             stripped_urls = map(lambda x: x.strip(), form_data.get("content", "").split("\n"))
             unique_urls = dict.fromkeys(stripped_urls).keys()
             playlist = form_data.get("playlist", False)
-            selected_format = DownloadFormat.get_format_from_cache(format_id = form_data.get("format")) 
+            selected_format = form_data.get("format") 
             output_dir = os.path.join(MEDIA_ROOT, request.user.username)
             added_to_queue_count = 0
             for url in unique_urls:
@@ -60,6 +62,9 @@ def downloader(request):
             return redirect("my_requests")
     else:
         form = DownloaderForm()
+        user_format_preference = UserFormatPreference.objects.filter(user=request.user, format__enabled=True).first()
+        if user_format_preference:
+            form.fields["format"].initial = user_format_preference.format.id
     template = loader.get_template('downloader.html')
     content = {
         "title": "Nové stahování",
@@ -173,7 +178,7 @@ def password_change(request):
             form.save()
             update_session_auth_hash(request, form.user)
             messages.success(request, "Změna hesla proběhla úspěšně. ")
-            redirect("downloader")
+            return redirect("downloader")
     else:
         form = PasswordChangeForm(user=request.user)
     template = loader.get_template('simple_form.html')
@@ -182,6 +187,37 @@ def password_change(request):
         "form": form,
         "action_url": "password_change",
         "submit_button_text" : "Změnit heslo",
+    }
+    return HttpResponse(template.render(content, request))
+
+@login_required(login_url='login_page')
+def user_settings(request):
+    template = loader.get_template('user_settings.html')
+    content = {
+        "title": "Uživatelské nastavení",
+        "links": [('password_change', 'Změna hesla'), ('format_preference', 'Změna preferovaného formátu')] 
+    }
+    return HttpResponse(template.render(content, request))
+
+@login_required(login_url='login_page')
+def format_preference(request):
+    user_format_preference_instance=UserFormatPreference.objects.get_or_create(user=request.user, defaults={'format': DownloadFormat.objects.filter(enabled=True).first()},)[0]
+    if request.method == "POST":
+        form = UserFormatPreferenceForm(data=request.POST, instance=user_format_preference_instance)
+        if form.is_valid():
+            form.save(commit=False)
+            form.user = request.user
+            form.save()
+            messages.success(request, "Změna preferovaného formátu úspěšně. ")
+            return redirect("downloader")
+    else:
+        form = UserFormatPreferenceForm(instance=user_format_preference_instance)
+    template = loader.get_template('simple_form.html')
+    content = {
+        "title": "Změna preferovaného formátu",
+        "form": form,
+        "action_url": "format_preference",
+        "submit_button_text" : "Změnit preferovaný formát",
     }
     return HttpResponse(template.render(content, request))
 

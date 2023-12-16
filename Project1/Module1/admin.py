@@ -1,7 +1,8 @@
 from django.contrib import admin
-from Module1.models.download_format import DownloadFormat
-from Module1.models.downloaded_file import DownloadedFile
-from Module1.models.download_request import DownloadRequest
+from Module1.models import DownloadFormat
+from Module1.models import DownloadedFile
+from Module1.models import DownloadRequest
+from Module1.models import UserFormatPreference
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -22,6 +23,10 @@ class DownloadRequestAdmin (admin.ModelAdmin):
     list_display = ['id', 'url', 'task_status', 'task_date_created', 'task_date_done', 'user', 'files_downloaded','format']
     list_filter = ('user','task__status', 'task__date_created', 'task__date_done')
 
+class UserFormatPreferenceAdmin (admin.ModelAdmin):
+    list_display = ['id', 'user', 'format']
+    list_filter = ('format',)
+
     
 # Rozšíření třídy UserAdmin
 class CustomUserAdmin(UserAdmin):
@@ -41,5 +46,6 @@ admin.site.register(User, CustomUserAdmin)
 admin.site.register(DownloadFormat, DownloadFormatAdmin)
 admin.site.register(DownloadedFile, DownloadedFileAdmin)
 admin.site.register(DownloadRequest, DownloadRequestAdmin)
+admin.site.register(UserFormatPreference, UserFormatPreferenceAdmin)
 
 
