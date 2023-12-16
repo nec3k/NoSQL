@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% load static %}
+{% load display_button %}
+
+{% block content %}
+
+<div class="my-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    {% for url_name, button_text in links %}
+    <div class="text-center">
+        <a href="{% url url_name %}" class="my-4 items-center justify-center flex rounded-md bg-cyan-900 px-3 py-1.5 font-semibold leading-6 text-white shadow-sm hover:bg-cyan-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-700">
+            {{ button_text }}
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
